@@ -1,11 +1,11 @@
-package com.AutocashApplication.rdv_expert.service;
+package ma.autocash.booking.api.providers;
 
-import com.AutocashApplication.rdv_expert.entity.Expert;
+import ma.autocash.booking.api.entity.Expert;
 
 
 import java.util.List;
 
-public interface ExpertService {
+public interface ExpertProvider {
 
     Expert saveExpert(Expert expert);
 

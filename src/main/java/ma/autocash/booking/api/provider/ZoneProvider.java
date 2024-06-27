@@ -1,10 +1,10 @@
-package com.AutocashApplication.rdv_expert.service;
+package ma.autocash.booking.api.providers;
 
-import com.AutocashApplication.rdv_expert.entity.Zone;
+import ma.autocash.booking.api.entity.Zone;
 
 import java.util.List;
 
-public interface ZoneService {
+public interface ZoneProvider {
     Zone saveZone(Zone zone);
     Zone updateZone(Zone zone);
     void deleteZone(Long id);

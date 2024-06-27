@@ -1,13 +1,13 @@
-package com.AutocashApplication.rdv_expert.service;
+package ma.autocash.booking.api.providers;
 
-import com.AutocashApplication.rdv_expert.entity.Availability;
-import com.AutocashApplication.rdv_expert.entity.Expert;
+import ma.autocash.booking.api.entity.Availability;
+import ma.autocash.booking.api.entity.Expert;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
-public interface AvailabilityService {
+public interface AvailabilityProvider {
     Availability saveAvailability(Availability availability);
     Availability updateAvailability(Availability availability);
     void deleteAvailability(Long id);

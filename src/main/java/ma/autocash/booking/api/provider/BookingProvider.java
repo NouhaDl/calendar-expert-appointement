@@ -1,10 +1,10 @@
-package com.AutocashApplication.rdv_expert.service;
+package ma.autocash.booking.api.providers;
 
-import com.AutocashApplication.rdv_expert.entity.Booking;
+import ma.autocash.booking.api.entity.Booking;
 
 import java.util.List;
 
-public interface BookingService {
+public interface BookingProvider {
     Booking saveBooking(Booking booking);
     Booking updateBooking(Booking booking);
     void deleteBooking(Long id);
