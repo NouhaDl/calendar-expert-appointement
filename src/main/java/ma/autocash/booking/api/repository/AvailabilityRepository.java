@@ -1,7 +1,7 @@
-package com.AutocashApplication.rdv_expert.repository;
+package ma.autocash.booking.api.repository;
 
-import com.AutocashApplication.rdv_expert.entity.Availability;
-import com.AutocashApplication.rdv_expert.entity.Expert;
+import ma.autocash.booking.api.entity.Availability;
+import ma.autocash.booking.api.entity.Expert;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

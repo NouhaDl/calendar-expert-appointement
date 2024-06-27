@@ -1,4 +1,4 @@
-package ma.autocash.booking.api.providers;
+package ma.autocash.booking.api.provider;
 
 import ma.autocash.booking.api.entity.Zone;
 

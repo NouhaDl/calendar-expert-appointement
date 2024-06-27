@@ -1,4 +1,4 @@
-package com.AutocashApplication.rdv_expert.exception;
+package ma.autocash.booking.api.exception;
 
 public class TechnicalException extends RuntimeException {
     public TechnicalException(String message) {

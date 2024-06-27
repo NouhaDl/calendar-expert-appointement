@@ -1,7 +1,7 @@
-package com.AutocashApplication.rdv_expert.controller;
-import com.AutocashApplication.rdv_expert.entity.Availability;
-import com.AutocashApplication.rdv_expert.entity.Expert;
-import com.AutocashApplication.rdv_expert.service.AvailabilityService;
+package ma.autocash.booking.api.controller;
+import ma.autocash.booking.api.entity.Availability;
+import ma.autocash.booking.api.entity.Expert;
+import ma.autocash.booking.api.provider.AvailabilityProvider;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -12,31 +12,31 @@ import java.util.List;
 @RequestMapping("/availabilities")
 public class AvailabilityController {
 
-    private final AvailabilityService availabilityService;
+    private final AvailabilityProvider availabilityProvider;
 
-    public AvailabilityController(AvailabilityService availabilityService) {
-        this.availabilityService = availabilityService;
+    public AvailabilityController(AvailabilityProvider availabilityProvider) {
+        this.availabilityProvider = availabilityProvider;
     }
 
     @PostMapping
     public Availability saveAvailability(@RequestBody Availability availability) {
-        return availabilityService.saveAvailability(availability);
+        return availabilityProvider.saveAvailability(availability);
     }
 
     @PutMapping("/{id}")
     public Availability updateAvailability(@PathVariable Long id, @RequestBody Availability availability) {
         availability.setId(id);
-        return availabilityService.updateAvailability(availability);
+        return availabilityProvider.updateAvailability(availability);
     }
 
     @DeleteMapping("/{id}")
     public void deleteAvailability(@PathVariable Long id) {
-        availabilityService.deleteAvailability(id);
+        availabilityProvider.deleteAvailability(id);
     }
 
     @GetMapping("/{id}")
     public Availability getAvailabilityById(@PathVariable Long id) {
-        return availabilityService.getAvailabilityById(id);
+        return availabilityProvider.getAvailabilityById(id);
     }
 
     @GetMapping("/expert")
@@ -48,11 +48,11 @@ public class AvailabilityController {
     ) {
         Expert expert = new Expert();
         expert.setId(expertId);
-        return availabilityService.getAvailabilitiesByExpertAndDateAndTimeRange(expert, date, startTime, endTime);
+        return availabilityProvider.getAvailabilitiesByExpertAndDateAndTimeRange(expert, date, startTime, endTime);
     }
 
     @GetMapping
     public List<Availability> getAllAvailabilities() {
-        return availabilityService.getAllAvailabilities();
+        return availabilityProvider.getAllAvailabilities();
     }
 }

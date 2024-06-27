@@ -1,9 +1,11 @@
-package com.AutocashApplication.rdv_expert.mapper;
+package ma.autocash.booking.api.mapper;
 
-import com.AutocashApplication.rdv_expert.dto.AvailabilityDto;
-import com.AutocashApplication.rdv_expert.entity.Availability;
-import com.AutocashApplication.rdv_expert.entity.Expert;
+import ma.autocash.booking.api.dto.AvailabilityDto;
+import ma.autocash.booking.api.entity.Availability;
+import ma.autocash.booking.api.entity.Expert;
+import org.mapstruct.MappingTarget;
 import org.springframework.stereotype.Component;
+
 @Component
 public class AvailabilityMapperImpl implements AvailabilityMapper {
 
@@ -20,22 +22,25 @@ public class AvailabilityMapperImpl implements AvailabilityMapper {
         dto.setStartTime(availability.getStartTime());
         dto.setEndTime(availability.getEndTime());
 
-
         return dto;
     }
 
     @Override
-    public Availability toEntity(AvailabilityDto dto, Expert expert) {
+    public Availability toEntity(AvailabilityDto dto, @MappingTarget Availability availability) {
         if (dto == null) {
             return null;
         }
 
-        Availability availability = new Availability();
+        if (availability == null) {
+            availability = new Availability();
+        }
+
         availability.setId(dto.getId());
-        availability.setExpert(expert);
         availability.setDate(dto.getDate());
         availability.setStartTime(dto.getStartTime());
         availability.setEndTime(dto.getEndTime());
+        // You may need to set the Expert entity here
+        // availability.setExpert(new Expert(dto.getExpertId()));
 
         return availability;
     }

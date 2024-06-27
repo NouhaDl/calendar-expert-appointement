@@ -1,6 +1,6 @@
-package com.AutocashApplication.rdv_expert.controller;
-import com.AutocashApplication.rdv_expert.entity.Expert;
-import com.AutocashApplication.rdv_expert.service.ExpertService;
+package ma.autocash.booking.api.controller;
+import ma.autocash.booking.api.entity.Expert;
+import ma.autocash.booking.api.provider.ExpertProvider;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -8,39 +8,39 @@ import java.util.List;
 @RequestMapping("/experts")
 public class ExpertController {
 
-    private final ExpertService expertService;
+    private final ExpertProvider expertProvider;
 
-    public ExpertController(ExpertService expertService) {
-        this.expertService = expertService;
+    public ExpertController(ExpertProvider expertProvider) {
+        this.expertProvider = expertProvider;
     }
 
     @PostMapping
     public Expert saveExpert(@RequestBody Expert expert) {
-        return expertService.saveExpert(expert);
+        return expertProvider.saveExpert(expert);
     }
 
     @PutMapping("/{id}")
     public Expert updateExpert(@PathVariable Long id, @RequestBody Expert expert) {
         expert.setId(id);
-        return expertService.updateExpert(expert);
+        return expertProvider.updateExpert(expert);
     }
 
     @DeleteMapping("/{id}")
     public void deleteExpert(@PathVariable Long id) {
-        expertService.deleteExpert(id);
+        expertProvider.deleteExpert(id);
     }
     @GetMapping
     public List<Expert> getAllExperts() {
-        return expertService.getAllExperts();
+        return expertProvider.getAllExperts();
     }
     @GetMapping("/{id}")
     public Expert getExpertById(@PathVariable Long id) {
-        return expertService.getExpertById(id);
+        return expertProvider.getExpertById(id);
     }
 
     @PostMapping("/{expertId}/assign-zone/{zoneId}")
     public Expert assignZoneToExpert(@PathVariable Long expertId, @PathVariable Long zoneId) {
-        return expertService.assignZoneToExpert(expertId, zoneId);
+        return expertProvider.assignZoneToExpert(expertId, zoneId);
     }
 
 

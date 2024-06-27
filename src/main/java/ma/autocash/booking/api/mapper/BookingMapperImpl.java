@@ -1,10 +1,9 @@
-package com.AutocashApplication.rdv_expert.mapper;
+package ma.autocash.booking.api.mapper;
 
-import com.AutocashApplication.rdv_expert.dto.BookingDto;
-import com.AutocashApplication.rdv_expert.entity.Booking;
-import com.AutocashApplication.rdv_expert.entity.Expert;
-import com.AutocashApplication.rdv_expert.entity.Zone;
-
+import ma.autocash.booking.api.dto.BookingDto;
+import ma.autocash.booking.api.entity.Booking;
+import ma.autocash.booking.api.entity.Expert;
+import ma.autocash.booking.api.entity.Zone;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -38,5 +37,16 @@ public class BookingMapperImpl implements BookingMapper {
         booking.setBookingTime(dto.getBookingTime());
 
         return booking;
+    }
+
+    @Override
+    public void updateFromDto(BookingDto dto, Booking booking) {
+        if (dto == null || booking == null) {
+            return;
+        }
+
+        booking.setId(dto.getId());
+        booking.setBookingTime(dto.getBookingTime());
+        // Assuming expert and zone are not updated directly from DTO in update scenario
     }
 }

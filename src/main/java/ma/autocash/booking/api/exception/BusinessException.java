@@ -1,4 +1,4 @@
-package com.AutocashApplication.rdv_expert.exception;
+package ma.autocash.booking.api.exception;
 
 public class BusinessException extends RuntimeException {
     public BusinessException(String message) {

@@ -1,4 +1,4 @@
-package com.AutocashApplication.rdv_expert;
+package ma.autocash.booking.api;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

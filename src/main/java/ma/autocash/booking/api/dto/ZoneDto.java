@@ -1,16 +1,15 @@
-package com.AutocashApplication.rdv_expert.dto;
+package ma.autocash.booking.api.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-@Setter
-@Getter
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ZoneDto {
-
     private Long id;
     private String name;
     private List<Long> expertIds;
@@ -21,7 +20,4 @@ public class ZoneDto {
         this.id = id;
         this.name = name;
     }
-
-
-
 }

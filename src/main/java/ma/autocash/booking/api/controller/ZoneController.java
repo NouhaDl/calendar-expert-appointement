@@ -1,8 +1,8 @@
-package com.AutocashApplication.rdv_expert.controller;
+package ma.autocash.booking.api.controller;
 
 
-import com.AutocashApplication.rdv_expert.entity.Zone;
-import com.AutocashApplication.rdv_expert.service.ZoneService;
+import ma.autocash.booking.api.entity.Zone;
+import ma.autocash.booking.api.provider.ZoneProvider;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,36 +11,36 @@ import java.util.List;
 @RequestMapping("/zones")
 public class ZoneController {
 
-    private final ZoneService zoneService;
+    private final ZoneProvider zoneProvider;
 
-    public ZoneController(ZoneService zoneService) {
-        this.zoneService = zoneService;
+    public ZoneController(ZoneProvider zoneProvider) {
+        this.zoneProvider = zoneProvider;
     }
 
     @PostMapping
     public Zone saveZone(@RequestBody Zone zone) {
-        return zoneService.saveZone(zone);
+        return zoneProvider.saveZone(zone);
     }
 
     @PutMapping("/{id}")
     public Zone updateZone(@PathVariable Long id, @RequestBody Zone zone) {
         // Assuming the zone object already has the ID set
         zone.setId(id);
-        return zoneService.updateZone(zone);
+        return zoneProvider.updateZone(zone);
     }
 
     @DeleteMapping("/{id}")
     public void deleteZone(@PathVariable Long id) {
-        zoneService.deleteZone(id);
+        zoneProvider.deleteZone(id);
     }
     @GetMapping
     public List<Zone> getAllZones() {
-        return zoneService.getAllZones();
+        return zoneProvider.getAllZones();
     }
 
     @GetMapping("/{id}")
     public Zone getZoneById(@PathVariable Long id) {
-        return zoneService.getZoneById(id);
+        return zoneProvider.getZoneById(id);
     }
 
 

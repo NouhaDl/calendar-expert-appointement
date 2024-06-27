@@ -1,14 +1,15 @@
-package com.AutocashApplication.rdv_expert.mapper;
+package ma.autocash.booking.api.mapper;
 
-import com.AutocashApplication.rdv_expert.dto.ExpertDto;
-import com.AutocashApplication.rdv_expert.entity.Expert;
-import com.AutocashApplication.rdv_expert.entity.Availability;
-import com.AutocashApplication.rdv_expert.entity.Booking;
-import com.AutocashApplication.rdv_expert.entity.Zone;
+import ma.autocash.booking.api.dto.ExpertDto;
+import ma.autocash.booking.api.entity.Expert;
+import ma.autocash.booking.api.entity.Availability;
+import ma.autocash.booking.api.entity.Booking;
+import ma.autocash.booking.api.entity.Zone;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
 @Component
 public class ExpertMapperImpl implements ExpertMapper {
 
@@ -40,13 +41,27 @@ public class ExpertMapperImpl implements ExpertMapper {
         expert.setFirstName(dto.getFirstName());
         expert.setLastName(dto.getLastName());
 
-
         expert.setZones(zones);
 
         return expert;
     }
 
-    //  methods to map IDs from entities to DTO
+    @Override
+    public void updateFromDto(ExpertDto dto, Expert expert, List<Zone> zones) {
+        if (dto == null || expert == null) {
+            return;
+        }
+
+        // Update the expert entity fields from DTO
+        expert.setFirstName(dto.getFirstName());
+        expert.setLastName(dto.getLastName());
+        // Update other fields as needed
+
+        // Set the zones
+        expert.setZones(zones);
+    }
+
+    // methods to map IDs from entities to DTO
     private List<Long> mapZoneIds(List<Zone> zones) {
         return zones.stream()
                 .map(Zone::getId)

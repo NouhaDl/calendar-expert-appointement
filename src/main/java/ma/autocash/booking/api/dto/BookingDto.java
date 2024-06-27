@@ -1,13 +1,9 @@
-package com.AutocashApplication.rdv_expert.dto;
+package ma.autocash.booking.api.dto;
 
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-@Setter
-@Getter
 @Data
 public class BookingDto {
     private Long id;
@@ -15,4 +11,36 @@ public class BookingDto {
     private Long zoneId;
     private LocalDateTime bookingTime;
 
+    // Getters and Setters
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getExpertId() {
+        return expertId;
+    }
+
+    public void setExpertId(Long expertId) {
+        this.expertId = expertId;
+    }
+
+    public Long getZoneId() {
+        return zoneId;
+    }
+
+    public void setZoneId(Long zoneId) {
+        this.zoneId = zoneId;
+    }
+
+    public LocalDateTime getBookingTime() {
+        return bookingTime;
+    }
+
+    public void setBookingTime(LocalDateTime bookingTime) {
+        this.bookingTime = bookingTime;
+    }
 }
