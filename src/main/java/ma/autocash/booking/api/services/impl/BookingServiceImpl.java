@@ -1,4 +1,4 @@
-package ma.autocash.booking.api.service;
+package ma.autocash.booking.api.services.impl;
 
 import ma.autocash.booking.api.dto.BookingDto;
 import ma.autocash.booking.api.entity.Booking;
@@ -8,6 +8,9 @@ import ma.autocash.booking.api.exception.BusinessException;
 import ma.autocash.booking.api.exception.TechnicalException;
 import ma.autocash.booking.api.mapper.BookingMapper;
 import ma.autocash.booking.api.repository.BookingRepository;
+import ma.autocash.booking.api.repository.ExpertRepository;
+import ma.autocash.booking.api.repository.ZoneRepository;
+import ma.autocash.booking.api.services.BookingService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,19 +22,28 @@ import java.util.stream.Collectors;
 public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
+    private final ExpertRepository expertRepository;
+    private final ZoneRepository zoneRepository;
     private final BookingMapper bookingMapper;
 
-    public BookingServiceImpl(BookingRepository bookingRepository, BookingMapper bookingMapper) {
+    public BookingServiceImpl(BookingRepository bookingRepository, ExpertRepository expertRepository, ZoneRepository zoneRepository, BookingMapper bookingMapper) {
         this.bookingRepository = bookingRepository;
+        this.expertRepository = expertRepository;
+        this.zoneRepository = zoneRepository;
         this.bookingMapper = bookingMapper;
     }
 
     @Override
     public BookingDto saveBooking(BookingDto bookingDto) {
         try {
-            Booking booking = bookingMapper.toEntity(bookingDto, new Expert(), new Zone()); // Création d'une nouvelle instance d'Expert et de Zone
+            Expert expert = expertRepository.findById(bookingDto.getExpertId())
+                    .orElseThrow(() -> new BusinessException("Expert not found"));
+            Zone zone = zoneRepository.findById(bookingDto.getZoneId())
+                    .orElseThrow(() -> new BusinessException("Zone not found"));
+
+            Booking booking = bookingMapper.toEntity(bookingDto, expert, zone);
             Booking savedBooking = bookingRepository.save(booking);
-            return bookingMapper.toDTO(savedBooking);
+            return bookingMapper.toDto(savedBooking);
         } catch (Exception e) {
             throw new TechnicalException("Error saving booking", e);
         }
@@ -43,12 +55,19 @@ public class BookingServiceImpl implements BookingService {
             Booking existingBooking = bookingRepository.findById(id)
                     .orElseThrow(() -> new BusinessException("Booking not found for update"));
 
-            // Mapping des données du DTO à l'entité existante
-            bookingMapper.updateFromDto(bookingDto, existingBooking, new Expert(), new Zone());
+            Expert expert = expertRepository.findById(bookingDto.getExpertId())
+                    .orElseThrow(() -> new BusinessException("Expert not found"));
+            Zone zone = zoneRepository.findById(bookingDto.getZoneId())
+                    .orElseThrow(() -> new BusinessException("Zone not found"));
 
-            bookingRepository.save(existingBooking); // Sauvegarde de l'entité mise à jour
+            bookingMapper.updateFromDto(bookingDto, existingBooking);
 
-            return bookingMapper.toDTO(existingBooking);
+            existingBooking.setExpert(expert);
+            existingBooking.setZone(zone);
+
+            bookingRepository.save(existingBooking);
+
+            return bookingMapper.toDto(existingBooking);
         } catch (Exception e) {
             throw new TechnicalException("Error updating booking", e);
         }
@@ -72,7 +91,7 @@ public class BookingServiceImpl implements BookingService {
         try {
             List<Booking> bookings = bookingRepository.findAll();
             return bookings.stream()
-                    .map(bookingMapper::toDTO)
+                    .map(bookingMapper::toDto)
                     .collect(Collectors.toList());
         } catch (Exception e) {
             throw new TechnicalException("Error retrieving bookings", e);
@@ -84,7 +103,7 @@ public class BookingServiceImpl implements BookingService {
         try {
             Booking booking = bookingRepository.findById(id)
                     .orElseThrow(() -> new BusinessException("Booking not found"));
-            return bookingMapper.toDTO(booking);
+            return bookingMapper.toDto(booking);
         } catch (Exception e) {
             throw new TechnicalException("Error retrieving booking by id", e);
         }

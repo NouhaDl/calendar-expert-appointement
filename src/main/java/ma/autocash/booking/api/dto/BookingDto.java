@@ -3,6 +3,7 @@ package ma.autocash.booking.api.dto;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Data
 public class BookingDto {
@@ -10,8 +11,10 @@ public class BookingDto {
     private Long expertId;
     private Long zoneId;
     private LocalDateTime bookingTime;
+    private LocalTime startTime;
+    private LocalTime endTime;
 
-    // Getters and Setters
+    // i ve a problem LombokGetters and Setters
     public Long getId() {
         return id;
     }
@@ -42,5 +45,21 @@ public class BookingDto {
 
     public void setBookingTime(LocalDateTime bookingTime) {
         this.bookingTime = bookingTime;
+    }
+
+    public LocalTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public LocalTime getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(LocalTime endTime) {
+        this.endTime = endTime;
     }
 }

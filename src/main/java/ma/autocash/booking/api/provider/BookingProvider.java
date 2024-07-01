@@ -10,4 +10,5 @@ public interface BookingProvider {
     void deleteBooking(Long id);
     List<Booking> getAllBookings();
     Booking getBookingById(Long id);
+
 }

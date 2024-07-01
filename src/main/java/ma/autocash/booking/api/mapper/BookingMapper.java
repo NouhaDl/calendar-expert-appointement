@@ -14,15 +14,24 @@ public interface BookingMapper {
 
     BookingMapper INSTANCE = Mappers.getMapper(BookingMapper.class);
 
-    @Mapping(source = "expert", target = "expertId")
-    @Mapping(source = "zone", target = "zoneId")
-    BookingDto toDTO(Booking booking);
+    @Mapping(source = "expert.id", target = "expertId")
+    @Mapping(source = "zone.id", target = "zoneId")
+    BookingDto toDto(Booking booking);
 
-    @Mapping(source = "expertId", target = "expert")
-    @Mapping(source = "zoneId", target = "zone")
-    Booking toEntity(BookingDto dto, Expert expert, Zone zone);
-
-    @Mapping(source = "expertId", target = "expert")
-    @Mapping(source = "zoneId", target = "zone")
+    @Mapping(target = "expert", ignore = true)
+    @Mapping(target = "zone", ignore = true)
     void updateFromDto(BookingDto dto, @MappingTarget Booking booking);
+
+    default Booking toEntity(BookingDto dto, Expert expert, Zone zone) {
+        if (dto == null) {
+            return null;
+        }
+        Booking booking = new Booking();
+
+        booking.setExpert(expert);
+        booking.setZone(zone);
+        // Other mappings if required
+        return booking;
+    }
 }
+

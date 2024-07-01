@@ -1,7 +1,6 @@
-package ma.autocash.booking.api.service;
+package ma.autocash.booking.api.services;
 
 import ma.autocash.booking.api.dto.ExpertDto;
-import ma.autocash.booking.api.entity.Expert;
 
 import java.util.List;
 

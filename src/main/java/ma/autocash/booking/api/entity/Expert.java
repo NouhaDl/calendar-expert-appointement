@@ -1,5 +1,6 @@
 package ma.autocash.booking.api.entity;
-
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,6 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Expert {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -20,10 +22,10 @@ public class Expert {
 
     @Column(name = "last_name")
     private String lastName;
-
+@JsonManagedReference
     @OneToMany(mappedBy = "expert", cascade = CascadeType.ALL)
     private List<Availability> availabilities;
-
+@JsonManagedReference
     @ManyToMany
     @JoinTable(
             name = "expert_zone",

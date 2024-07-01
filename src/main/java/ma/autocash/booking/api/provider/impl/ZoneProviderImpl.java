@@ -1,8 +1,9 @@
-package ma.autocash.booking.api.provider;
+package ma.autocash.booking.api.provider.impl;
 
 import ma.autocash.booking.api.entity.Zone;
 import ma.autocash.booking.api.exception.BusinessException;
 import ma.autocash.booking.api.exception.TechnicalException;
+import ma.autocash.booking.api.provider.ZoneProvider;
 import ma.autocash.booking.api.repository.ZoneRepository;
 import org.springframework.stereotype.Service;
 

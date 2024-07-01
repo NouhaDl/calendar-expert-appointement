@@ -23,7 +23,6 @@ public class BookingController {
 
     @PutMapping("/{id}")
     public Booking updateBooking(@PathVariable Long id, @RequestBody Booking booking) {
-        // Assuming the booking object already has the ID set
         booking.setId(id);
         return bookingProvider.updateBooking(booking);
     }

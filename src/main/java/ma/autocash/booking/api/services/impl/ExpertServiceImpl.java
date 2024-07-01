@@ -1,4 +1,4 @@
-package ma.autocash.booking.api.service;
+package ma.autocash.booking.api.services.impl;
 
 import ma.autocash.booking.api.dto.ExpertDto;
 import ma.autocash.booking.api.entity.Expert;
@@ -8,6 +8,7 @@ import ma.autocash.booking.api.exception.TechnicalException;
 import ma.autocash.booking.api.mapper.ExpertMapper;
 import ma.autocash.booking.api.repository.ExpertRepository;
 import ma.autocash.booking.api.repository.ZoneRepository;
+import ma.autocash.booking.api.services.ExpertService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,9 +32,11 @@ public class ExpertServiceImpl implements ExpertService {
     @Override
     public ExpertDto saveExpert(ExpertDto expertDto) {
         try {
-            Expert expert = expertMapper.toEntity(expertDto, loadZonesByIds(expertDto.getZoneIds()));
+            Expert expert = expertMapper.toEntity(expertDto);
+            List<Zone> zones = loadZonesByIds(expertDto.getZoneIds());
+            expert.setZones(zones); // Set zones manually
             Expert savedExpert = expertRepository.save(expert);
-            return expertMapper.toDTO(savedExpert);
+            return expertMapper.toDto(savedExpert);
         } catch (Exception e) {
             throw new TechnicalException("Error saving expert", e);
         }
@@ -45,11 +48,16 @@ public class ExpertServiceImpl implements ExpertService {
             Expert existingExpert = expertRepository.findById(id)
                     .orElseThrow(() -> new BusinessException("Expert not found for update"));
 
-            expertMapper.updateFromDto(expertDto, existingExpert, loadZonesByIds(expertDto.getZoneIds()));
+            // Update fields manually
+            existingExpert.setFirstName(expertDto.getFirstName());
+            existingExpert.setLastName(expertDto.getLastName());
+
+            List<Zone> zones = loadZonesByIds(expertDto.getZoneIds());
+            existingExpert.setZones(zones); // Set zones manually
 
             expertRepository.save(existingExpert);
 
-            return expertMapper.toDTO(existingExpert);
+            return expertMapper.toDto(existingExpert);
         } catch (Exception e) {
             throw new TechnicalException("Error updating expert", e);
         }
@@ -73,7 +81,7 @@ public class ExpertServiceImpl implements ExpertService {
         try {
             List<Expert> experts = expertRepository.findAll();
             return experts.stream()
-                    .map(expertMapper::toDTO)
+                    .map(expertMapper::toDto)
                     .collect(Collectors.toList());
         } catch (Exception e) {
             throw new TechnicalException("Error retrieving experts", e);
@@ -85,7 +93,7 @@ public class ExpertServiceImpl implements ExpertService {
         try {
             Expert expert = expertRepository.findById(id)
                     .orElseThrow(() -> new BusinessException("Expert not found"));
-            return expertMapper.toDTO(expert);
+            return expertMapper.toDto(expert);
         } catch (Exception e) {
             throw new TechnicalException("Error retrieving expert by id", e);
         }
@@ -104,7 +112,7 @@ public class ExpertServiceImpl implements ExpertService {
 
             Expert updatedExpert = expertRepository.save(expert);
 
-            return expertMapper.toDTO(updatedExpert);
+            return expertMapper.toDto(updatedExpert);
         } catch (Exception e) {
             throw new TechnicalException("Error assigning zone to expert", e);
         }

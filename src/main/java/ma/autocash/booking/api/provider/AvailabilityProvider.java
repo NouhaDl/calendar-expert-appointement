@@ -1,7 +1,7 @@
 package ma.autocash.booking.api.provider;
 
+
 import ma.autocash.booking.api.entity.Availability;
-import ma.autocash.booking.api.entity.Expert;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -9,9 +9,15 @@ import java.util.List;
 
 public interface AvailabilityProvider {
     Availability saveAvailability(Availability availability);
-    Availability updateAvailability(Availability availability);
+
+    Availability updateAvailability(Long id, Availability updatedAvailability);
+
     void deleteAvailability(Long id);
+
     List<Availability> getAllAvailabilities();
+
     Availability getAvailabilityById(Long id);
-    List<Availability> getAvailabilitiesByExpertAndDateAndTimeRange(Expert expert, LocalDate date, LocalTime startTime, LocalTime endTime);
+
+    List<Availability> getAvailabilitiesByExpertAndDateAndTimeRange(Long expertId, LocalDate date, LocalTime startTime, LocalTime endTime);
 }
+

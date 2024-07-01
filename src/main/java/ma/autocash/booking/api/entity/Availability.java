@@ -1,7 +1,9 @@
 package ma.autocash.booking.api.entity;
 
-import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
+
+import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -11,11 +13,13 @@ import java.time.LocalTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Availability {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @JsonBackReference
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "expert_id")
     private Expert expert;
 

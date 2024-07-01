@@ -24,7 +24,6 @@ public class ZoneController {
 
     @PutMapping("/{id}")
     public Zone updateZone(@PathVariable Long id, @RequestBody Zone zone) {
-        // Assuming the zone object already has the ID set
         zone.setId(id);
         return zoneProvider.updateZone(zone);
     }

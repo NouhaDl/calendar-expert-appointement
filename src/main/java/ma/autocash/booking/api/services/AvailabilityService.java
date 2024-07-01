@@ -1,4 +1,4 @@
-package ma.autocash.booking.api.service;
+package ma.autocash.booking.api.services;
 
 import ma.autocash.booking.api.dto.AvailabilityDto;
 
@@ -7,6 +7,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 public interface AvailabilityService {
+
     AvailabilityDto saveAvailability(AvailabilityDto availabilityDto);
 
     AvailabilityDto updateAvailability(Long id, AvailabilityDto availabilityDto);

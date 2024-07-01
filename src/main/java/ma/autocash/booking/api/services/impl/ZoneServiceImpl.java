@@ -1,4 +1,4 @@
-package ma.autocash.booking.api.service;
+package ma.autocash.booking.api.services.impl;
 
 import ma.autocash.booking.api.dto.ZoneDto;
 import ma.autocash.booking.api.entity.Zone;
@@ -6,6 +6,7 @@ import ma.autocash.booking.api.exception.BusinessException;
 import ma.autocash.booking.api.exception.TechnicalException;
 import ma.autocash.booking.api.mapper.ZoneMapper;
 import ma.autocash.booking.api.repository.ZoneRepository;
+import ma.autocash.booking.api.services.ZoneService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +30,7 @@ public class ZoneServiceImpl implements ZoneService {
         try {
             Zone zone = zoneMapper.toEntity(zoneDto);
             Zone savedZone = zoneRepository.save(zone);
-            return zoneMapper.toDTO(savedZone);
+            return zoneMapper.toDto(savedZone);
         } catch (Exception e) {
             throw new TechnicalException("Error saving zone", e);
         }
@@ -41,11 +42,13 @@ public class ZoneServiceImpl implements ZoneService {
             Zone existingZone = zoneRepository.findById(id)
                     .orElseThrow(() -> new BusinessException("Zone not found for update"));
 
-            zoneMapper.updateFromDto(zoneDto, existingZone);
+            existingZone.setName(zoneDto.getName()); // Update name if needed
+
+            // Handle associations if necessary, like experts and bookings
 
             zoneRepository.save(existingZone);
 
-            return zoneMapper.toDTO(existingZone);
+            return zoneMapper.toDto(existingZone);
         } catch (Exception e) {
             throw new TechnicalException("Error updating zone", e);
         }
@@ -69,7 +72,7 @@ public class ZoneServiceImpl implements ZoneService {
         try {
             List<Zone> zones = zoneRepository.findAll();
             return zones.stream()
-                    .map(zoneMapper::toDTO)
+                    .map(zoneMapper::toDto)
                     .collect(Collectors.toList());
         } catch (Exception e) {
             throw new TechnicalException("Error retrieving zones", e);
@@ -81,7 +84,7 @@ public class ZoneServiceImpl implements ZoneService {
         try {
             Zone zone = zoneRepository.findById(id)
                     .orElseThrow(() -> new BusinessException("Zone not found"));
-            return zoneMapper.toDTO(zone);
+            return zoneMapper.toDto(zone);
         } catch (Exception e) {
             throw new TechnicalException("Error retrieving zone by id", e);
         }
