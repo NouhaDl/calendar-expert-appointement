@@ -1,8 +1,7 @@
 package ma.autocash.booking.api.controller;
 
-
-import ma.autocash.booking.api.entity.Zone;
-import ma.autocash.booking.api.provider.ZoneProvider;
+import ma.autocash.booking.api.dto.ZoneDto;
+import ma.autocash.booking.api.services.ZoneService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,37 +10,34 @@ import java.util.List;
 @RequestMapping("/zones")
 public class ZoneController {
 
-    private final ZoneProvider zoneProvider;
+    private final ZoneService zoneService;
 
-    public ZoneController(ZoneProvider zoneProvider) {
-        this.zoneProvider = zoneProvider;
+    public ZoneController(ZoneService zoneService) {
+        this.zoneService = zoneService;
     }
 
     @PostMapping
-    public Zone saveZone(@RequestBody Zone zone) {
-        return zoneProvider.saveZone(zone);
+    public ZoneDto saveZone(@RequestBody ZoneDto zoneDto) {
+        return zoneService.saveZone(zoneDto);
     }
 
     @PutMapping("/{id}")
-    public Zone updateZone(@PathVariable Long id, @RequestBody Zone zone) {
-        zone.setId(id);
-        return zoneProvider.updateZone(zone);
+    public ZoneDto updateZone(@PathVariable Long id, @RequestBody ZoneDto zoneDto) {
+        return zoneService.updateZone(id, zoneDto);
     }
 
     @DeleteMapping("/{id}")
     public void deleteZone(@PathVariable Long id) {
-        zoneProvider.deleteZone(id);
+        zoneService.deleteZone(id);
     }
+
     @GetMapping
-    public List<Zone> getAllZones() {
-        return zoneProvider.getAllZones();
+    public List<ZoneDto> getAllZones() {
+        return zoneService.getAllZones();
     }
 
     @GetMapping("/{id}")
-    public Zone getZoneById(@PathVariable Long id) {
-        return zoneProvider.getZoneById(id);
+    public ZoneDto getZoneById(@PathVariable Long id) {
+        return zoneService.getZoneById(id);
     }
-
-
 }
-

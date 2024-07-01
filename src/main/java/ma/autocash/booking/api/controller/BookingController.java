@@ -1,7 +1,7 @@
 package ma.autocash.booking.api.controller;
 
-import ma.autocash.booking.api.entity.Booking;
-import ma.autocash.booking.api.provider.BookingProvider;
+import ma.autocash.booking.api.dto.BookingDto;
+import ma.autocash.booking.api.services.BookingService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -10,35 +10,34 @@ import java.util.List;
 @RequestMapping("/bookings")
 public class BookingController {
 
-    private final BookingProvider bookingProvider;
+    private final BookingService bookingService;
 
-    public BookingController(BookingProvider bookingProvider) {
-        this.bookingProvider = bookingProvider;
+    public BookingController(BookingService bookingService) {
+        this.bookingService = bookingService;
     }
 
     @PostMapping
-    public Booking saveBooking(@RequestBody Booking booking) {
-        return bookingProvider.saveBooking(booking);
+    public BookingDto saveBooking(@RequestBody BookingDto bookingDto) {
+        return bookingService.saveBooking(bookingDto);
     }
 
     @PutMapping("/{id}")
-    public Booking updateBooking(@PathVariable Long id, @RequestBody Booking booking) {
-        booking.setId(id);
-        return bookingProvider.updateBooking(booking);
+    public BookingDto updateBooking(@PathVariable Long id, @RequestBody BookingDto bookingDto) {
+        return bookingService.updateBooking(id, bookingDto);
     }
 
     @DeleteMapping("/{id}")
     public void deleteBooking(@PathVariable Long id) {
-        bookingProvider.deleteBooking(id);
+        bookingService.deleteBooking(id);
     }
 
     @GetMapping("/{id}")
-    public Booking getBookingById(@PathVariable Long id) {
-        return bookingProvider.getBookingById(id);
+    public BookingDto getBookingById(@PathVariable Long id) {
+        return bookingService.getBookingById(id);
     }
 
     @GetMapping
-    public List<Booking> getAllBookings() {
-        return bookingProvider.getAllBookings();
+    public List<BookingDto> getAllBookings() {
+        return bookingService.getAllBookings();
     }
 }

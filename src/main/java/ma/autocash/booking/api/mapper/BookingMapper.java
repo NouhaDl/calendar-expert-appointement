@@ -1,5 +1,4 @@
 package ma.autocash.booking.api.mapper;
-
 import ma.autocash.booking.api.dto.BookingDto;
 import ma.autocash.booking.api.entity.Booking;
 import ma.autocash.booking.api.entity.Expert;
@@ -30,8 +29,7 @@ public interface BookingMapper {
 
         booking.setExpert(expert);
         booking.setZone(zone);
-        // Other mappings if required
+        // Map other fields if needed
         return booking;
     }
 }
-

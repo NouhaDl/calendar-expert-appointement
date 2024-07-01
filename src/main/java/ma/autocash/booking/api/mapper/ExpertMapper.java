@@ -1,5 +1,4 @@
 package ma.autocash.booking.api.mapper;
-
 import ma.autocash.booking.api.dto.ExpertDto;
 import ma.autocash.booking.api.entity.Expert;
 import ma.autocash.booking.api.entity.Zone;
@@ -29,7 +28,7 @@ public interface ExpertMapper {
     @Mappings({
             @Mapping(target = "zones", ignore = true),
             @Mapping(target = "availabilities", ignore = true),
-            @Mapping(target = "bookings", ignore = true),
+            @Mapping(target = "bookings", ignore = true)
     })
     Expert toEntity(ExpertDto dto);
 

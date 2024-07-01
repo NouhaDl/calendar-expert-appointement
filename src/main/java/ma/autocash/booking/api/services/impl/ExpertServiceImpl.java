@@ -34,7 +34,7 @@ public class ExpertServiceImpl implements ExpertService {
         try {
             Expert expert = expertMapper.toEntity(expertDto);
             List<Zone> zones = loadZonesByIds(expertDto.getZoneIds());
-            expert.setZones(zones); // Set zones manually
+            expert.setZones(zones);
             Expert savedExpert = expertRepository.save(expert);
             return expertMapper.toDto(savedExpert);
         } catch (Exception e) {
@@ -48,12 +48,11 @@ public class ExpertServiceImpl implements ExpertService {
             Expert existingExpert = expertRepository.findById(id)
                     .orElseThrow(() -> new BusinessException("Expert not found for update"));
 
-            // Update fields manually
             existingExpert.setFirstName(expertDto.getFirstName());
             existingExpert.setLastName(expertDto.getLastName());
 
             List<Zone> zones = loadZonesByIds(expertDto.getZoneIds());
-            existingExpert.setZones(zones); // Set zones manually
+            existingExpert.setZones(zones);
 
             expertRepository.save(existingExpert);
 
