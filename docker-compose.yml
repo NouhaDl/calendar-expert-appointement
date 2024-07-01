@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 version: '3.8'
 
 services:
@@ -9,3 +10,16 @@ services:
       POSTGRES_PASSWORD: password
     ports:
       - "5432:5432"
+=======
+services:
+  postgres:
+    image: 'postgres:latest'
+    environment:
+      - ' POSTGRES_DB=postgres'
+      -  'POSTGRES_USER=postgres'
+      - 'POSTGRES_PASSWORD=postgres'
+    ports:
+      - '5432:5432'
+
+
+>>>>>>> 2f54106e8bfd7ce60add53e63f00bc17cdf8d8c7

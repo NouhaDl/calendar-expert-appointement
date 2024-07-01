@@ -1,0 +1,4 @@
+FROM openjdk :
+COPY
+EXPOSE
+ENTRYPOINT
