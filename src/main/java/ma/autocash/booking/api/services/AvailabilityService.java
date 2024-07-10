@@ -1,6 +1,8 @@
 package ma.autocash.booking.api.services;
 
 import ma.autocash.booking.api.dto.AvailabilityDto;
+import ma.autocash.booking.api.exception.BusinessException;
+import ma.autocash.booking.api.exception.TechnicalException;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -8,15 +10,17 @@ import java.util.List;
 
 public interface AvailabilityService {
 
-    AvailabilityDto saveAvailability(AvailabilityDto availabilityDto);
+    AvailabilityDto saveAvailability(AvailabilityDto availabilityDto) throws TechnicalException;
 
-    AvailabilityDto updateAvailability(Long id, AvailabilityDto availabilityDto);
+    AvailabilityDto updateAvailability(Long id, AvailabilityDto availabilityDto) throws BusinessException, TechnicalException;
 
-    void deleteAvailability(Long id);
+    void deleteAvailability(Long id) throws TechnicalException;
 
-    AvailabilityDto getAvailabilityById(Long id);
+    void deleteAvailabilitiesByExpertAndDateAndTimeRange(Long expertId, LocalDate date, LocalTime startTime, LocalTime endTime) throws TechnicalException;
 
-    List<AvailabilityDto> getAllAvailabilities();
+    AvailabilityDto getAvailabilityById(Long id) throws BusinessException, TechnicalException;
 
-    List<AvailabilityDto> getAvailabilitiesByExpertAndDateAndTimeRange(Long expertId, LocalDate date, LocalTime startTime, LocalTime endTime);
+    List<AvailabilityDto> getAllAvailabilities() throws TechnicalException;
+
+    List<AvailabilityDto> getAvailabilitiesByExpertAndDateAndTimeRange(Long expertId, LocalDate date, LocalTime startTime, LocalTime endTime) throws TechnicalException;
 }

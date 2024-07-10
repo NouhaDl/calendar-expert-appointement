@@ -5,21 +5,19 @@ import ma.autocash.booking.api.entity.Expert;
 import ma.autocash.booking.api.mapper.AvailabilityMapper;
 import ma.autocash.booking.api.repository.AvailabilityRepository;
 import ma.autocash.booking.api.provider.AvailabilityProvider;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
-@Component
+@Service
 public class AvailabilityProviderImpl implements AvailabilityProvider {
 
     private final AvailabilityRepository availabilityRepository;
-    private final AvailabilityMapper availabilityMapper;
 
     public AvailabilityProviderImpl(AvailabilityRepository availabilityRepository, AvailabilityMapper availabilityMapper) {
         this.availabilityRepository = availabilityRepository;
-        this.availabilityMapper = availabilityMapper;
     }
 
     @Override
@@ -32,11 +30,11 @@ public class AvailabilityProviderImpl implements AvailabilityProvider {
         Availability existingAvailability = availabilityRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Availability not found with id: " + id));
 
-        // Update fields from updatedAvailability to existingAvailability
+
         existingAvailability.setDate(updatedAvailability.getDate());
         existingAvailability.setStartTime(updatedAvailability.getStartTime());
         existingAvailability.setEndTime(updatedAvailability.getEndTime());
-        // Update other fields as needed
+
 
         return availabilityRepository.save(existingAvailability);
     }
@@ -59,8 +57,8 @@ public class AvailabilityProviderImpl implements AvailabilityProvider {
 
     @Override
     public List<Availability> getAvailabilitiesByExpertAndDateAndTimeRange(Long expertId, LocalDate date, LocalTime startTime, LocalTime endTime) {
-        // Assuming you have an expert entity or object to pass to findByExpertAndDateAndStartTimeBetween
-        Expert expert = new Expert(); // Replace with actual expert retrieval logic
+
+        Expert expert = new Expert();
 
         return availabilityRepository.findByExpertAndDateAndStartTimeBetween(expert, date, startTime, endTime);
     }

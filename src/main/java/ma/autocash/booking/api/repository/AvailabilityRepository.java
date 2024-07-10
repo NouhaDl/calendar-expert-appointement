@@ -12,4 +12,6 @@ import java.util.List;
 @Repository
 public interface AvailabilityRepository extends JpaRepository<Availability, Long> {
     List<Availability> findByExpertAndDateAndStartTimeBetween(Expert expert, LocalDate date, LocalTime startTime, LocalTime endTime);
+
+    List<Availability> findByExpert_IdAndDateAndStartTimeBetween(Long expertId, LocalDate date, LocalTime startTime, LocalTime endTime);
 }

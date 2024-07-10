@@ -1,8 +1,9 @@
 package ma.autocash.booking.api.services.impl;
 
+import lombok.SneakyThrows;
 import ma.autocash.booking.api.dto.ZoneDto;
 import ma.autocash.booking.api.entity.Zone;
-import ma.autocash.booking.api.exception.BusinessException;
+import ma.autocash.booking.api.exception.KeyValueErrorImpl;
 import ma.autocash.booking.api.exception.TechnicalException;
 import ma.autocash.booking.api.mapper.ZoneMapper;
 import ma.autocash.booking.api.repository.ZoneRepository;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,49 +28,58 @@ public class ZoneServiceImpl implements ZoneService {
     }
 
     @Override
-    public ZoneDto saveZone(ZoneDto zoneDto) {
+    public ZoneDto saveZone(ZoneDto zoneDto) throws TechnicalException {
         try {
-            Zone zone = zoneMapper.toEntity(zoneDto);
-            Zone savedZone = zoneRepository.save(zone);
-            return zoneMapper.toDto(savedZone);
+            Objects.requireNonNull(zoneDto, "ZoneDto must not be null");
+            Objects.requireNonNull(zoneDto.getName(), "Zone name must not be null");
+
+            Zone zoneEntity = zoneMapper.toEntity(zoneDto);
+            Zone savedZone = zoneRepository.save(zoneEntity);
+
+            ZoneDto savedZoneDto = zoneMapper.toDto(savedZone);
+            savedZoneDto.setId(savedZone.getId());
+
+            return savedZoneDto;
         } catch (Exception e) {
             throw new TechnicalException("Error saving zone", e);
         }
     }
 
     @Override
-    public ZoneDto updateZone(Long id, ZoneDto zoneDto) {
+    public ZoneDto updateZone(Long id, ZoneDto zoneDto) throws TechnicalException {
         try {
             Zone existingZone = zoneRepository.findById(id)
-                    .orElseThrow(() -> new BusinessException("Zone not found for update"));
+                    .orElseThrow(() -> new TechnicalException(new KeyValueErrorImpl("zone.update.notfound", 404, 404)));
 
-            existingZone.setName(zoneDto.getName()); // Update name if needed
-
-            // Handle associations if necessary, like experts and bookings
+            existingZone.setName(zoneDto.getName());
 
             zoneRepository.save(existingZone);
 
             return zoneMapper.toDto(existingZone);
+        } catch (TechnicalException e) {
+            throw e; // Re-throwing TechnicalException to propagate it
         } catch (Exception e) {
             throw new TechnicalException("Error updating zone", e);
         }
     }
 
     @Override
-    public void deleteZone(Long id) {
+    public void deleteZone(Long id) throws TechnicalException {
         try {
             if (zoneRepository.existsById(id)) {
                 zoneRepository.deleteById(id);
             } else {
-                throw new BusinessException("Zone not found for deletion");
+                throw new TechnicalException(new KeyValueErrorImpl("zone.delete.notfound", 404, 404));
             }
+        } catch (TechnicalException e) {
+            throw e; // Re-throwing TechnicalException to propagate it
         } catch (Exception e) {
             throw new TechnicalException("Error deleting zone", e);
         }
     }
 
     @Override
-    public List<ZoneDto> getAllZones() {
+    public List<ZoneDto> getAllZones() throws TechnicalException {
         try {
             List<Zone> zones = zoneRepository.findAll();
             return zones.stream()
@@ -80,11 +91,13 @@ public class ZoneServiceImpl implements ZoneService {
     }
 
     @Override
-    public ZoneDto getZoneById(Long id) {
+    public ZoneDto getZoneById(Long id) throws TechnicalException {
         try {
             Zone zone = zoneRepository.findById(id)
-                    .orElseThrow(() -> new BusinessException("Zone not found"));
+                    .orElseThrow(() -> new TechnicalException(new KeyValueErrorImpl("zone.notfound", 404, 404)));
             return zoneMapper.toDto(zone);
+        } catch (TechnicalException e) {
+            throw e; // Re-throwing TechnicalException to propagate it
         } catch (Exception e) {
             throw new TechnicalException("Error retrieving zone by id", e);
         }

@@ -7,35 +7,56 @@ import ma.autocash.booking.api.entity.Booking;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
-import org.mapstruct.factory.Mappers;
 
+
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 public interface ZoneMapper {
 
-    ZoneMapper INSTANCE = Mappers.getMapper(ZoneMapper.class);
-
     @Mapping(target = "expertIds", source = "experts", qualifiedByName = "extractExpertIds")
     @Mapping(target = "bookingIds", source = "bookings", qualifiedByName = "extractBookingIds")
     ZoneDto toDto(Zone zone);
 
-    @Mapping(target = "experts", ignore = true)
-    @Mapping(target = "bookings", ignore = true)
+    @Mapping(target = "experts", source = "expertIds", qualifiedByName = "toExperts")
+    @Mapping(target = "bookings", source = "bookingIds", qualifiedByName = "toBookings")
     Zone toEntity(ZoneDto dto);
 
     @Named("extractExpertIds")
     default List<Long> extractExpertIds(List<Expert> experts) {
-        return experts.stream()
+        return experts != null ? experts.stream()
                 .map(Expert::getId)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()) : Collections.emptyList();
     }
 
     @Named("extractBookingIds")
     default List<Long> extractBookingIds(List<Booking> bookings) {
-        return bookings.stream()
+        return bookings != null ? bookings.stream()
                 .map(Booking::getId)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()) : Collections.emptyList();
+    }
+
+    @Named("toExperts")
+    default List<Expert> toExperts(List<Long> expertIds) {
+        return expertIds != null ? expertIds.stream()
+                .map(id -> {
+                    Expert expert = new Expert();
+                    expert.setId(id);
+                    return expert;
+                })
+                .collect(Collectors.toList()) : Collections.emptyList();
+    }
+
+    @Named("toBookings")
+    default List<Booking> toBookings(List<Long> bookingIds) {
+        return bookingIds != null ? bookingIds.stream()
+                .map(id -> {
+                    Booking booking = new Booking();
+                    booking.setId(id);
+                    return booking;
+                })
+                .collect(Collectors.toList()) : Collections.emptyList();
     }
 }

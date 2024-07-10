@@ -1,10 +1,16 @@
 package ma.autocash.booking.api.controller;
 
+import lombok.SneakyThrows;
 import ma.autocash.booking.api.dto.ZoneDto;
 import ma.autocash.booking.api.services.ZoneService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.media.Content;
 
 @RestController
 @RequestMapping("/zones")
@@ -17,27 +23,86 @@ public class ZoneController {
     }
 
     @PostMapping
-    public ZoneDto saveZone(@RequestBody ZoneDto zoneDto) {
-        return zoneService.saveZone(zoneDto);
+    @Operation(summary = "Create a new Zone",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Zone created successfully",
+                            content = @Content(mediaType = "application/json"))
+            })
+    public ResponseEntity<ZoneDto> saveZone(@RequestBody ZoneDto zoneDto) {
+        try {
+            ZoneDto savedZone = zoneService.saveZone(zoneDto);
+            return ResponseEntity.ok(savedZone);
+        } catch (Exception e) {
+            // Handle the exception appropriately, e.g., log it and return an error response
+            return ResponseEntity.status(500).build();
+        }
     }
 
     @PutMapping("/{id}")
-    public ZoneDto updateZone(@PathVariable Long id, @RequestBody ZoneDto zoneDto) {
-        return zoneService.updateZone(id, zoneDto);
+    @Operation(summary = "Update an existing Zone by ID",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Zone updated successfully",
+                            content = @Content(mediaType = "application/json")),
+                    @ApiResponse(responseCode = "404", description = "Zone not found")
+            })
+    public ResponseEntity<ZoneDto> updateZone(@PathVariable Long id, @RequestBody ZoneDto zoneDto) {
+        try {
+            ZoneDto updatedZone = zoneService.updateZone(id, zoneDto);
+            return ResponseEntity.ok(updatedZone);
+        } catch (Exception e) {
+
+            return ResponseEntity.status(500).build();
+        }
     }
 
     @DeleteMapping("/{id}")
-    public void deleteZone(@PathVariable Long id) {
-        zoneService.deleteZone(id);
-    }
+    @Operation(summary = "Delete a Zone by ID",
+            responses = {
+                    @ApiResponse(responseCode = "204", description = "Zone deleted successfully"),
+                    @ApiResponse(responseCode = "404", description = "Zone not found")
+            })
+    public ResponseEntity<Void> deleteZone(@PathVariable Long id) {
+        try {
+            zoneService.deleteZone(id);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
 
-    @GetMapping
-    public List<ZoneDto> getAllZones() {
-        return zoneService.getAllZones();
+            return ResponseEntity.status(500).build();
+        }
     }
 
     @GetMapping("/{id}")
-    public ZoneDto getZoneById(@PathVariable Long id) {
-        return zoneService.getZoneById(id);
+    @Operation(summary = "Get a Zone by ID",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Zone found",
+                            content = @Content(mediaType = "application/json")),
+                    @ApiResponse(responseCode = "404", description = "Zone not found")
+            })
+    public ResponseEntity<ZoneDto> getZoneById(@PathVariable Long id) {
+        try {
+            ZoneDto zone = zoneService.getZoneById(id);
+            return zone != null ?
+                    ResponseEntity.ok(zone) :
+                    ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            // Handle the exception appropriately, e.g., log it and return an error response
+            return ResponseEntity.status(500).build();
+        }
+    }
+
+    @GetMapping
+    @Operation(summary = "Get all Zones",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Zones found",
+                            content = @Content(mediaType = "application/json"))
+            })
+    public ResponseEntity<List<ZoneDto>> getAllZones() {
+        try {
+            List<ZoneDto> zones = zoneService.getAllZones();
+            return ResponseEntity.ok(zones);
+        } catch (Exception e) {
+            // Handle the exception appropriately, e.g., log it and return an error response
+            return ResponseEntity.status(500).build();
+        }
     }
 }

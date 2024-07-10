@@ -14,8 +14,7 @@ public class ZoneDto {
     private String name;
     private List<Long> expertIds;
     private List<Long> bookingIds;
-
-    // This part (problems of Lombok) Getters and Setters
+//lombok
     public Long getId() {
         return id;
     }

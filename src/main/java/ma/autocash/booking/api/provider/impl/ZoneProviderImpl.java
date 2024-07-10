@@ -1,7 +1,9 @@
 package ma.autocash.booking.api.provider.impl;
 
+import lombok.SneakyThrows;
 import ma.autocash.booking.api.entity.Zone;
 import ma.autocash.booking.api.exception.BusinessException;
+import ma.autocash.booking.api.exception.KeyValueErrorImpl;
 import ma.autocash.booking.api.exception.TechnicalException;
 import ma.autocash.booking.api.provider.ZoneProvider;
 import ma.autocash.booking.api.repository.ZoneRepository;
@@ -18,8 +20,9 @@ public class ZoneProviderImpl implements ZoneProvider {
         this.zoneRepository = zoneRepository;
     }
 
+    @SneakyThrows
     @Override
-    public Zone saveZone(Zone zone) {
+    public Zone saveZone(Zone zone) throws TechnicalException {
         try {
             return zoneRepository.save(zone);
         } catch (Exception e) {
@@ -27,34 +30,37 @@ public class ZoneProviderImpl implements ZoneProvider {
         }
     }
 
+    @SneakyThrows
     @Override
-    public Zone updateZone(Zone zone) {
+    public Zone updateZone(Zone zone) throws BusinessException, TechnicalException {
         try {
             if (zoneRepository.existsById(zone.getId())) {
                 return zoneRepository.save(zone);
             } else {
-                throw new BusinessException("Zone not found for update");
+                throw new BusinessException(new KeyValueErrorImpl("zone.update.notfound", 404, 404));
             }
         } catch (Exception e) {
             throw new TechnicalException("Error updating zone", e);
         }
     }
 
+    @SneakyThrows
     @Override
-    public void deleteZone(Long id) {
+    public void deleteZone(Long id) throws BusinessException, TechnicalException {
         try {
             if (zoneRepository.existsById(id)) {
                 zoneRepository.deleteById(id);
             } else {
-                throw new BusinessException("Zone not found for deletion");
+                throw new BusinessException(new KeyValueErrorImpl("zone.delete.notfound", 404, 404));
             }
         } catch (Exception e) {
             throw new TechnicalException("Error deleting zone", e);
         }
     }
 
+    @SneakyThrows
     @Override
-    public List<Zone> getAllZones() {
+    public List<Zone> getAllZones() throws TechnicalException {
         try {
             return zoneRepository.findAll();
         } catch (Exception e) {
@@ -62,10 +68,11 @@ public class ZoneProviderImpl implements ZoneProvider {
         }
     }
 
+    @SneakyThrows
     @Override
-    public Zone getZoneById(Long id) {
+    public Zone getZoneById(Long id) throws BusinessException, TechnicalException {
         try {
-            return zoneRepository.findById(id).orElseThrow(() -> new BusinessException("Zone not found"));
+            return zoneRepository.findById(id).orElseThrow(() -> new BusinessException(new KeyValueErrorImpl("zone.get.notfound", 404, 404)));
         } catch (Exception e) {
             throw new TechnicalException("Error retrieving zone by id", e);
         }

@@ -4,10 +4,11 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Entity
+//@Table(name = "booking_details", schema = "expertises")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -28,7 +29,7 @@ public class Booking {
     @JoinColumn(name = "zone_id")
     private Zone zone;
 
-    private LocalDateTime bookingTime;
+    private LocalDate bookingDate;
     private LocalTime startTime;
     private LocalTime endTime;
 
@@ -57,12 +58,12 @@ public class Booking {
         this.zone = zone;
     }
 
-    public LocalDateTime getBookingTime() {
-        return bookingTime;
+    public LocalDate getBookingDate() {
+        return bookingDate;
     }
 
-    public void setBookingTime(LocalDateTime bookingTime) {
-        this.bookingTime = bookingTime;
+    public void setBookingDate(LocalDate bookingDate) {
+        this.bookingDate = bookingDate;
     }
 
     public LocalTime getStartTime() {

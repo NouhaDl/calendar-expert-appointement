@@ -9,13 +9,13 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<String> handleBusinessException(BusinessException ex) {
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    public ResponseEntity<ErrorMessage> handleBusinessException(BusinessException ex) {
+        return new ResponseEntity<>(ex.getErrorMessage(), HttpStatus.valueOf(ex.getErrorMessage().getHttpCode()));
     }
 
     @ExceptionHandler(TechnicalException.class)
-    public ResponseEntity<String> handleTechnicalException(TechnicalException ex) {
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<ErrorMessage> handleTechnicalException(TechnicalException ex) {
+        return new ResponseEntity<>(ex.getErrorMessage(), HttpStatus.valueOf(ex.getErrorMessage().getHttpCode()));
     }
 
     @ExceptionHandler(Exception.class)

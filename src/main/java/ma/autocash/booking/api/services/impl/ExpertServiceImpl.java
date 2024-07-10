@@ -1,9 +1,8 @@
 package ma.autocash.booking.api.services.impl;
-
+import lombok.SneakyThrows;
 import ma.autocash.booking.api.dto.ExpertDto;
 import ma.autocash.booking.api.entity.Expert;
 import ma.autocash.booking.api.entity.Zone;
-import ma.autocash.booking.api.exception.BusinessException;
 import ma.autocash.booking.api.exception.TechnicalException;
 import ma.autocash.booking.api.mapper.ExpertMapper;
 import ma.autocash.booking.api.repository.ExpertRepository;
@@ -20,43 +19,38 @@ import java.util.stream.Collectors;
 public class ExpertServiceImpl implements ExpertService {
 
     private final ExpertRepository expertRepository;
-    private final ZoneRepository zoneRepository;
     private final ExpertMapper expertMapper;
+    private final ZoneRepository zoneRepository;
 
-    public ExpertServiceImpl(ExpertRepository expertRepository, ZoneRepository zoneRepository, ExpertMapper expertMapper) {
+    public ExpertServiceImpl(ExpertRepository expertRepository, ExpertMapper expertMapper, ZoneRepository zoneRepository) {
         this.expertRepository = expertRepository;
-        this.zoneRepository = zoneRepository;
         this.expertMapper = expertMapper;
+        this.zoneRepository = zoneRepository;
     }
 
     @Override
     public ExpertDto saveExpert(ExpertDto expertDto) {
-        try {
-            Expert expert = expertMapper.toEntity(expertDto);
-            List<Zone> zones = loadZonesByIds(expertDto.getZoneIds());
-            expert.setZones(zones);
-            Expert savedExpert = expertRepository.save(expert);
-            return expertMapper.toDto(savedExpert);
-        } catch (Exception e) {
-            throw new TechnicalException("Error saving expert", e);
-        }
+        Expert expert = expertMapper.toEntity(expertDto);
+        Expert savedExpert = expertRepository.save(expert);
+        ExpertDto savedExpertDto = expertMapper.toDto(savedExpert);
+        savedExpertDto.setId(savedExpert.getId());
+        return savedExpertDto;
     }
 
     @Override
-    public ExpertDto updateExpert(Long id, ExpertDto expertDto) {
+    public ExpertDto updateExpert(Long id, ExpertDto expertDto) throws TechnicalException {
         try {
             Expert existingExpert = expertRepository.findById(id)
-                    .orElseThrow(() -> new BusinessException("Expert not found for update"));
+                    .orElseThrow(() -> new RuntimeException("Expert not found with id: " + id));
 
             existingExpert.setFirstName(expertDto.getFirstName());
             existingExpert.setLastName(expertDto.getLastName());
+            existingExpert.setZoneIds(expertDto.getZoneIds());
+            existingExpert.setBookingIds(expertDto.getBookingIds());
+            existingExpert.setAvailabilityIds(expertDto.getAvailabilityIds());
 
-            List<Zone> zones = loadZonesByIds(expertDto.getZoneIds());
-            existingExpert.setZones(zones);
-
-            expertRepository.save(existingExpert);
-
-            return expertMapper.toDto(existingExpert);
+            Expert updatedExpert = expertRepository.save(existingExpert);
+            return expertMapper.toDto(updatedExpert);
         } catch (Exception e) {
             throw new TechnicalException("Error updating expert", e);
         }
@@ -64,63 +58,36 @@ public class ExpertServiceImpl implements ExpertService {
 
     @Override
     public void deleteExpert(Long id) {
-        try {
-            if (expertRepository.existsById(id)) {
-                expertRepository.deleteById(id);
-            } else {
-                throw new BusinessException("Expert not found for deletion");
-            }
-        } catch (Exception e) {
-            throw new TechnicalException("Error deleting expert", e);
-        }
+        expertRepository.deleteById(id);
     }
 
     @Override
     public List<ExpertDto> getAllExperts() {
-        try {
-            List<Expert> experts = expertRepository.findAll();
-            return experts.stream()
-                    .map(expertMapper::toDto)
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            throw new TechnicalException("Error retrieving experts", e);
-        }
+        List<Expert> experts = expertRepository.findAll();
+        return experts.stream()
+                .map(expertMapper::toDto)
+                .collect(Collectors.toList());
     }
 
     @Override
     public ExpertDto getExpertById(Long id) {
-        try {
-            Expert expert = expertRepository.findById(id)
-                    .orElseThrow(() -> new BusinessException("Expert not found"));
-            return expertMapper.toDto(expert);
-        } catch (Exception e) {
-            throw new TechnicalException("Error retrieving expert by id", e);
-        }
+        Expert expert = expertRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Expert not found with id: " + id));
+        return expertMapper.toDto(expert);
     }
 
     @Override
     public ExpertDto assignZoneToExpert(Long expertId, Long zoneId) {
-        try {
-            Expert expert = expertRepository.findById(expertId)
-                    .orElseThrow(() -> new BusinessException("Expert not found"));
+        Expert expert = expertRepository.findById(expertId)
+                .orElseThrow(() -> new RuntimeException("Expert not found with id: " + expertId));
 
-            Zone zone = zoneRepository.findById(zoneId)
-                    .orElseThrow(() -> new BusinessException("Zone not found"));
+        Zone zone = zoneRepository.findById(zoneId)
+                .orElseThrow(() -> new RuntimeException("Zone not found with id: " + zoneId));
 
-            expert.getZones().add(zone);
+        expert.getZones().add(zone);
 
-            Expert updatedExpert = expertRepository.save(expert);
+        Expert updatedExpert = expertRepository.save(expert);
 
-            return expertMapper.toDto(updatedExpert);
-        } catch (Exception e) {
-            throw new TechnicalException("Error assigning zone to expert", e);
-        }
-    }
-
-    private List<Zone> loadZonesByIds(List<Long> zoneIds) {
-        return zoneIds.stream()
-                .map(zoneId -> zoneRepository.findById(zoneId)
-                        .orElseThrow(() -> new BusinessException("Zone not found with id: " + zoneId)))
-                .collect(Collectors.toList());
+        return expertMapper.toDto(updatedExpert);
     }
 }

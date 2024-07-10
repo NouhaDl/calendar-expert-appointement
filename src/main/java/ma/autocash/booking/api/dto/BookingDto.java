@@ -2,7 +2,7 @@ package ma.autocash.booking.api.dto;
 
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Data
@@ -10,11 +10,11 @@ public class BookingDto {
     private Long id;
     private Long expertId;
     private Long zoneId;
-    private LocalDateTime bookingTime;
+    private LocalDate bookingDate;
     private LocalTime startTime;
     private LocalTime endTime;
 
-    // i ve a problem LombokGetters and Setters
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -39,12 +39,12 @@ public class BookingDto {
         this.zoneId = zoneId;
     }
 
-    public LocalDateTime getBookingTime() {
-        return bookingTime;
+    public LocalDate getBookingDate() {
+        return bookingDate;
     }
 
-    public void setBookingTime(LocalDateTime bookingTime) {
-        this.bookingTime = bookingTime;
+    public void setBookingDate(LocalDate bookingDate) {
+        this.bookingDate = bookingDate;
     }
 
     public LocalTime getStartTime() {

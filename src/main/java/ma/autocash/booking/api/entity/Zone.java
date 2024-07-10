@@ -7,6 +7,7 @@ import lombok.*;
 import java.util.List;
 
 @Entity
+//@Table(name = "zone_details", schema = "expertises")
 @Getter
 @Setter
 @NoArgsConstructor

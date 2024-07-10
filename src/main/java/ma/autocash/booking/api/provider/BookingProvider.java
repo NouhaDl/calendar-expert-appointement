@@ -1,14 +1,15 @@
 package ma.autocash.booking.api.provider;
 
 import ma.autocash.booking.api.entity.Booking;
+import ma.autocash.booking.api.exception.BusinessException;
 
 import java.util.List;
 
 public interface BookingProvider {
     Booking saveBooking(Booking booking);
-    Booking updateBooking(Booking booking);
-    void deleteBooking(Long id);
+    Booking updateBooking(Booking booking) throws BusinessException;
+    void deleteBooking(Long id) throws BusinessException;
     List<Booking> getAllBookings();
-    Booking getBookingById(Long id);
+    Booking getBookingById(Long id) throws BusinessException;
 
 }

@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Entity
+//@Table(name = "availability_details", schema = "expertises")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -71,5 +72,9 @@ public class Availability {
 
     public void setEndTime(LocalTime endTime) {
         this.endTime = endTime;
+    }
+
+    public void setExpertId(Long expertId) {
+
     }
 }
