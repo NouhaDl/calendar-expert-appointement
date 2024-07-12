@@ -1,8 +1,8 @@
-package ma.autocash.booking.api.services.impl;
+package ma.autocash.booking.api.service.impl;
 
 import lombok.SneakyThrows;
-import ma.autocash.booking.api.dto.BookingDto;
 import ma.autocash.booking.api.dto.AvailabilityDto;
+import ma.autocash.booking.api.dto.BookingDto;
 import ma.autocash.booking.api.entity.Booking;
 import ma.autocash.booking.api.entity.Expert;
 import ma.autocash.booking.api.entity.Zone;
@@ -13,10 +13,8 @@ import ma.autocash.booking.api.mapper.BookingMapper;
 import ma.autocash.booking.api.repository.BookingRepository;
 import ma.autocash.booking.api.repository.ExpertRepository;
 import ma.autocash.booking.api.repository.ZoneRepository;
-
-import ma.autocash.booking.api.services.BookingService;
-import ma.autocash.booking.api.services.AvailabilityService;
-
+import ma.autocash.booking.api.service.AvailabilityService;
+import ma.autocash.booking.api.service.BookingService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,97 +44,129 @@ public class BookingServiceImpl implements BookingService {
 
     @SneakyThrows
     @Override
-    public BookingDto saveBooking(BookingDto bookingDto) throws TechnicalException {
-        Objects.requireNonNull(bookingDto, "BookingDto must not be null");
-
-        Objects.requireNonNull(bookingDto.getExpertId(), "Expert ID must not be null");
-        Objects.requireNonNull(bookingDto.getZoneId(), "Zone ID must not be null");
-
-        Expert expert = expertRepository.findById(bookingDto.getExpertId())
-                .orElseThrow(() -> new IllegalArgumentException("Expert not found with ID: " + bookingDto.getExpertId()));
-
-        Zone zone = zoneRepository.findById(bookingDto.getZoneId())
-                .orElseThrow(() -> new IllegalArgumentException("Zone not found with ID: " + bookingDto.getZoneId()));
-
-        Booking bookingEntity = bookingMapper.toEntity(bookingDto);
-
-        bookingEntity.setExpert(expert);
-        bookingEntity.setZone(zone);
-
-        Booking savedBooking = bookingRepository.save(bookingEntity);
-
-        availabilityService.deleteAvailabilitiesByExpertAndDateAndTimeRange(
-                bookingDto.getExpertId(), bookingDto.getBookingDate(),
-                bookingDto.getStartTime(), bookingDto.getEndTime());
-
-        BookingDto savedBookingDto = bookingMapper.toDto(savedBooking);
-        savedBookingDto.setId(savedBooking.getId());
-
-        return savedBookingDto;
-    }
-
-    @SneakyThrows
-    @Override
-    public BookingDto updateBooking(Long id, BookingDto bookingDto) throws TechnicalException {
-        Objects.requireNonNull(id, "Booking ID must not be null");
-        Objects.requireNonNull(bookingDto, "BookingDto must not be null");
-
+    public BookingDto saveBooking(BookingDto bookingDto) {
         try {
-            // Récupérer les informations de l'ancienne réservation avant de la mettre à jour
-            Booking existingBooking = bookingRepository.findById(id)
-                    .orElseThrow(() -> new BusinessException(new KeyValueErrorImpl("booking.update.notfound", 404, 404)));
+            Objects.requireNonNull(bookingDto, "BookingDto must not be null");
+            Objects.requireNonNull(bookingDto.getExpertId(), "Expert ID must not be null");
+            Objects.requireNonNull(bookingDto.getZoneId(), "Zone ID must not be null");
 
-            // Restaurer les disponibilités basées sur les informations de l'ancienne réservation
-            AvailabilityDto oldAvailabilityDto = new AvailabilityDto();
-            oldAvailabilityDto.setExpertId(existingBooking.getExpert().getId());
-            oldAvailabilityDto.setDate(existingBooking.getBookingDate());
-            oldAvailabilityDto.setStartTime(existingBooking.getStartTime());
-            oldAvailabilityDto.setEndTime(existingBooking.getEndTime());
-
-            availabilityService.saveAvailability(oldAvailabilityDto);
-
-            // Mettre à jour la réservation avec les nouvelles informations
             Expert expert = expertRepository.findById(bookingDto.getExpertId())
-                    .orElseThrow(() -> new BusinessException(new KeyValueErrorImpl("booking.update.notfound" + bookingDto.getExpertId(), 404, 404)));
+                    .orElseThrow(() -> new BusinessException(new KeyValueErrorImpl("booking.save.expert.notfound", 404, 404)));
 
             Zone zone = zoneRepository.findById(bookingDto.getZoneId())
-                    .orElseThrow(() -> new BusinessException(new KeyValueErrorImpl("zone.get.notfound" + bookingDto.getExpertId(), 404, 404)));
+                    .orElseThrow(() -> new BusinessException(new KeyValueErrorImpl("booking.save.zone.notfound", 404, 404)));
 
-            existingBooking.setBookingDate(bookingDto.getBookingDate());
-            existingBooking.setStartTime(bookingDto.getStartTime());
-            existingBooking.setEndTime(bookingDto.getEndTime());
-            existingBooking.setExpert(expert);
-            existingBooking.setZone(zone);
+            Booking bookingEntity = bookingMapper.toEntity(bookingDto);
+            bookingEntity.setExpert(expert);
+            bookingEntity.setZone(zone);
 
-            Booking updatedBooking = bookingRepository.save(existingBooking);
+            Booking savedBooking = bookingRepository.save(bookingEntity);
 
-            // Supprimer l availability correspondant à la nouvelle réservation mise a jour
             availabilityService.deleteAvailabilitiesByExpertAndDateAndTimeRange(
-                    existingBooking.getExpert().getId(), existingBooking.getBookingDate(),
-                    existingBooking.getStartTime(), existingBooking.getEndTime());
+                    bookingDto.getExpertId(), bookingDto.getBookingDate(),
+                    bookingDto.getStartTime(), bookingDto.getEndTime());
 
-            return bookingMapper.toDto(updatedBooking);
+            BookingDto savedBookingDto = bookingMapper.toDto(savedBooking);
+            savedBookingDto.setId(savedBooking.getId());
+
+            return savedBookingDto;
         } catch (Exception e) {
-            throw new TechnicalException("Error updating booking", e);
+            throw new TechnicalException("Error saving booking", e);
         }
     }
 
     @SneakyThrows
     @Override
-    public void deleteBooking(Long id) throws TechnicalException {
+    public BookingDto updateBooking(Long id, BookingDto bookingDto) {
+        Objects.requireNonNull(id, "Booking ID must not be null");
+        Objects.requireNonNull(bookingDto, "BookingDto must not be null");
+
+        try {
+            Booking existingBooking = bookingRepository.findById(id)
+                    .orElseThrow(() -> new BusinessException(new KeyValueErrorImpl("booking.update.notfound", 404, 404)));
+
+            AvailabilityDto oldAvailabilityDto = new AvailabilityDto();
+            oldAvailabilityDto.setExpertId(existingBooking.getExpert().getId());
+            oldAvailabilityDto.setDate(existingBooking.getBookingDate());
+            oldAvailabilityDto.setStartTime(existingBooking.getStartTime());
+            oldAvailabilityDto.setEndTime(existingBooking.getEndTime());
+            availabilityService.saveAvailability(oldAvailabilityDto);
+
+            updateBookingEntity(existingBooking, bookingDto);
+
+            Booking updatedBooking = bookingRepository.save(existingBooking);
+
+            availabilityService.deleteAvailabilitiesByExpertAndDateAndTimeRange(
+                    existingBooking.getExpert().getId(), existingBooking.getBookingDate(),
+                    existingBooking.getStartTime(), existingBooking.getEndTime());
+
+            availabilityService.deleteAvailabilitiesByExpertAndDateAndTimeRange(
+                    bookingDto.getExpertId(), bookingDto.getBookingDate(),
+                    bookingDto.getStartTime(), bookingDto.getEndTime());
+
+            return bookingMapper.toDto(updatedBooking);
+        } catch (BusinessException e) {
+            throw new TechnicalException("BusinessException occurred while updating booking", e);
+        } catch (TechnicalException | IllegalArgumentException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new TechnicalException("Error updating booking", e);
+        }
+    }
+
+    private void updateBookingEntity(Booking booking, BookingDto bookingDto) throws TechnicalException {
+        try {
+            if (bookingDto.getBookingDate() != null) {
+                booking.setBookingDate(bookingDto.getBookingDate());
+            }
+
+            if (bookingDto.getStartTime() != null) {
+                booking.setStartTime(bookingDto.getStartTime());
+            }
+
+            if (bookingDto.getEndTime() != null) {
+                booking.setEndTime(bookingDto.getEndTime());
+            }
+
+            if (bookingDto.getExpertId() != null && !Objects.equals(booking.getExpert().getId(), bookingDto.getExpertId())) {
+                Expert expert = expertRepository.findById(bookingDto.getExpertId())
+                        .orElseThrow(() -> new BusinessException(new KeyValueErrorImpl("booking.update.expert.notfound", 404, 404)));
+                booking.setExpert(expert);
+            }
+
+            if (bookingDto.getZoneId() != null && !Objects.equals(booking.getZone().getId(), bookingDto.getZoneId())) {
+                Zone zone = zoneRepository.findById(bookingDto.getZoneId())
+                        .orElseThrow(() -> new BusinessException(new KeyValueErrorImpl("booking.update.zone.notfound", 404, 404)));
+                booking.setZone(zone);
+            }
+        } catch (Exception e) {
+            throw new TechnicalException("Error updating booking entity", e);
+        }
+    }
+
+    @SneakyThrows
+    @Override
+    public void deleteBooking(Long id) {
+        Objects.requireNonNull(id, "Booking ID must not be null");
+
         try {
             Booking booking = bookingRepository.findById(id)
                     .orElseThrow(() -> new BusinessException(new KeyValueErrorImpl("booking.delete.notfound", 404, 404)));
 
-            bookingRepository.deleteById(id);
             AvailabilityDto availabilityDto = new AvailabilityDto();
             availabilityDto.setExpertId(booking.getExpert().getId());
             availabilityDto.setDate(booking.getBookingDate());
             availabilityDto.setStartTime(booking.getStartTime());
             availabilityDto.setEndTime(booking.getEndTime());
-
             availabilityService.saveAvailability(availabilityDto);
 
+            bookingRepository.deleteById(id);
+
+            availabilityService.deleteAvailabilitiesByExpertAndDateAndTimeRange(
+                    booking.getExpert().getId(), booking.getBookingDate(),
+                    booking.getStartTime(), booking.getEndTime());
+        } catch (BusinessException e) {
+            throw new TechnicalException("BusinessException occurred while deleting booking", e);
         } catch (Exception e) {
             throw new TechnicalException("Error deleting booking", e);
         }
@@ -144,7 +174,7 @@ public class BookingServiceImpl implements BookingService {
 
     @SneakyThrows
     @Override
-    public List<BookingDto> getAllBookings() throws TechnicalException {
+    public List<BookingDto> getAllBookings() {
         try {
             List<Booking> bookings = bookingRepository.findAll();
             return bookings.stream()
@@ -155,14 +185,17 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    @SneakyThrows
     @Override
     public BookingDto getBookingById(Long id) throws TechnicalException {
+        Objects.requireNonNull(id, "Booking ID must not be null");
+
         try {
             Booking booking = bookingRepository.findById(id)
                     .orElseThrow(() -> new BusinessException(new KeyValueErrorImpl("booking.get.notfound", 404, 404)));
 
             return bookingMapper.toDto(booking);
+        } catch (BusinessException e) {
+            throw new TechnicalException("BusinessException occurred while retrieving booking by id", e);
         } catch (Exception e) {
             throw new TechnicalException("Error retrieving booking by id", e);
         }

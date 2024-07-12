@@ -45,13 +45,14 @@ public interface ExpertMapper {
 
     @Named("extractZoneIds")
     default List<Long> extractZoneIds(List<Zone> zones) {
-        if (zones != null) {
+        if (zones != null && !zones.isEmpty()) {
             return zones.stream()
                     .map(Zone::getId)
                     .collect(Collectors.toList());
         }
-        return null;
+        return List.of(); // Retourne une liste vide au lieu de null
     }
+
 
     @Named("extractAvailabilityIds")
     default List<Long> extractAvailabilityIds(List<Availability> availabilities) {

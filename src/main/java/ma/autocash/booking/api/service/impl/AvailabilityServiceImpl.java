@@ -1,14 +1,13 @@
-package ma.autocash.booking.api.services.impl;
+package ma.autocash.booking.api.service.impl;
 
-import lombok.SneakyThrows;
 import ma.autocash.booking.api.dto.AvailabilityDto;
 import ma.autocash.booking.api.entity.Availability;
-import ma.autocash.booking.api.exception.KeyValueErrorImpl;
-import ma.autocash.booking.api.mapper.AvailabilityMapper;
 import ma.autocash.booking.api.exception.BusinessException;
+import ma.autocash.booking.api.exception.KeyValueErrorImpl;
 import ma.autocash.booking.api.exception.TechnicalException;
+import ma.autocash.booking.api.mapper.AvailabilityMapper;
 import ma.autocash.booking.api.repository.AvailabilityRepository;
-import ma.autocash.booking.api.services.AvailabilityService;
+import ma.autocash.booking.api.service.AvailabilityService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,7 +18,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional
+@Transactional(rollbackFor = {TechnicalException.class, BusinessException.class})
 public class AvailabilityServiceImpl implements AvailabilityService {
 
     private final AvailabilityRepository availabilityRepository;
@@ -34,11 +33,8 @@ public class AvailabilityServiceImpl implements AvailabilityService {
     public AvailabilityDto saveAvailability(AvailabilityDto availabilityDto) throws TechnicalException {
         Objects.requireNonNull(availabilityDto, "AvailabilityDto must not be null");
 
-        // Convert AvailabilityDto to Availability entity
-        Availability availabilityEntity = availabilityMapper.toEntity(availabilityDto);
-
-        // Save the entity and return the mapped DTO
         try {
+            Availability availabilityEntity = availabilityMapper.toEntity(availabilityDto);
             Availability savedAvailability = availabilityRepository.save(availabilityEntity);
             return availabilityMapper.toDto(savedAvailability);
         } catch (Exception e) {
@@ -46,29 +42,39 @@ public class AvailabilityServiceImpl implements AvailabilityService {
         }
     }
 
-    @SneakyThrows
     @Override
-    public AvailabilityDto updateAvailability(Long id, AvailabilityDto availabilityDto) throws BusinessException, TechnicalException {
+    public AvailabilityDto updateAvailability(Long id, AvailabilityDto availabilityDto) throws TechnicalException {
         Objects.requireNonNull(id, "Availability ID must not be null");
         Objects.requireNonNull(availabilityDto, "AvailabilityDto must not be null");
 
         try {
+
             Availability existingAvailability = availabilityRepository.findById(id)
                     .orElseThrow(() -> new BusinessException(new KeyValueErrorImpl("availability.get.notfound", 404, 404)));
 
-            existingAvailability.setExpertId(availabilityDto.getExpertId());
-            existingAvailability.setDate(availabilityDto.getDate());
-            existingAvailability.setStartTime(availabilityDto.getStartTime());
-            existingAvailability.setEndTime(availabilityDto.getEndTime());
+
+            if (availabilityDto.getExpertId() != null) {
+                existingAvailability.setExpertId(availabilityDto.getExpertId());
+            }
+            if (availabilityDto.getDate() != null) {
+                existingAvailability.setDate(availabilityDto.getDate());
+            }
+            if (availabilityDto.getStartTime() != null) {
+                existingAvailability.setStartTime(availabilityDto.getStartTime());
+            }
+            if (availabilityDto.getEndTime() != null) {
+                existingAvailability.setEndTime(availabilityDto.getEndTime());
+            }
 
             Availability updatedAvailability = availabilityRepository.save(existingAvailability);
+
+
             return availabilityMapper.toDto(updatedAvailability);
         } catch (Exception e) {
             throw new TechnicalException("Error updating availability", e);
         }
     }
 
-    @SneakyThrows
     @Override
     public void deleteAvailability(Long id) throws TechnicalException {
         Objects.requireNonNull(id, "Availability ID must not be null");
@@ -79,26 +85,8 @@ public class AvailabilityServiceImpl implements AvailabilityService {
         }
     }
 
-    @SneakyThrows
     @Override
-    public void deleteAvailabilitiesByExpertAndDateAndTimeRange(Long expertId, LocalDate date, LocalTime startTime, LocalTime endTime) throws TechnicalException {
-        Objects.requireNonNull(expertId, "Expert ID must not be null");
-        Objects.requireNonNull(date, "Date must not be null");
-        Objects.requireNonNull(startTime, "Start time must not be null");
-        Objects.requireNonNull(endTime, "End time must not be null");
-
-        try {
-            List<Availability> availabilitiesToDelete = availabilityRepository.findByExpert_IdAndDateAndStartTimeBetween(
-                    expertId, date, startTime, endTime);
-            availabilityRepository.deleteAll(availabilitiesToDelete);
-        } catch (Exception e) {
-            throw new TechnicalException("Error deleting availabilities by expert and date and time range", e);
-        }
-    }
-
-    @SneakyThrows
-    @Override
-    public AvailabilityDto getAvailabilityById(Long id) throws BusinessException, TechnicalException {
+    public AvailabilityDto getAvailabilityById(Long id) throws TechnicalException {
         Objects.requireNonNull(id, "Availability ID must not be null");
         try {
             Availability availabilityEntity = availabilityRepository.findById(id)
@@ -109,7 +97,6 @@ public class AvailabilityServiceImpl implements AvailabilityService {
         }
     }
 
-    @SneakyThrows
     @Override
     public List<AvailabilityDto> getAllAvailabilities() throws TechnicalException {
         try {
@@ -122,22 +109,40 @@ public class AvailabilityServiceImpl implements AvailabilityService {
         }
     }
 
-    @SneakyThrows
     @Override
-    public List<AvailabilityDto> getAvailabilitiesByExpertAndDateAndTimeRange(Long expertId, LocalDate date, LocalTime startTime, LocalTime endTime) throws TechnicalException {
+    public List<AvailabilityDto> getAvailabilitiesByExpertAndTimeRange(Long expertId, LocalTime startTime, LocalTime endTime) throws TechnicalException {
         Objects.requireNonNull(expertId, "Expert ID must not be null");
-        Objects.requireNonNull(date, "Date must not be null");
-        Objects.requireNonNull(startTime, "Start time must not be null");
-        Objects.requireNonNull(endTime, "End time must not be null");
 
         try {
-            List<Availability> availabilities = availabilityRepository.findByExpert_IdAndDateAndStartTimeBetween(
-                    expertId, date, startTime, endTime);
+            List<Availability> availabilities;
+
+            if (startTime != null && endTime != null) {
+                availabilities = availabilityRepository.findByExpert_IdAndStartTimeBetween(
+                        expertId, startTime, endTime);
+            } else {
+                availabilities = availabilityRepository.findByExpert_Id(expertId);
+            }
+
             return availabilities.stream()
                     .map(availabilityMapper::toDto)
                     .collect(Collectors.toList());
         } catch (Exception e) {
-            throw new TechnicalException("Error retrieving availabilities by expert and date and time range", e);
+            throw new TechnicalException("Error retrieving availabilities by expert and time range", e);
+        }
+    }
+
+    @Override
+    public void deleteAvailabilitiesByExpertAndDateAndTimeRange(Long expertId, LocalDate date, LocalTime startTime, LocalTime endTime) throws TechnicalException {
+        Objects.requireNonNull(expertId, "Expert ID must not be null");
+        Objects.requireNonNull(date, "Date must not be null");
+
+        try {
+            List<Availability> availabilitiesToDelete = availabilityRepository.findByExpert_IdAndStartTimeBetween(
+                    expertId, startTime, endTime);
+
+            availabilityRepository.deleteAll(availabilitiesToDelete);
+        } catch (Exception e) {
+            throw new TechnicalException("Error deleting availabilities by expert and date/time range", e);
         }
     }
 }

@@ -1,8 +1,7 @@
 package ma.autocash.booking.api.controller;
 
-import lombok.SneakyThrows;
 import ma.autocash.booking.api.dto.ZoneDto;
-import ma.autocash.booking.api.services.ZoneService;
+import ma.autocash.booking.api.service.ZoneService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -85,7 +84,7 @@ public class ZoneController {
                     ResponseEntity.ok(zone) :
                     ResponseEntity.notFound().build();
         } catch (Exception e) {
-            // Handle the exception appropriately, e.g., log it and return an error response
+
             return ResponseEntity.status(500).build();
         }
     }
@@ -101,7 +100,7 @@ public class ZoneController {
             List<ZoneDto> zones = zoneService.getAllZones();
             return ResponseEntity.ok(zones);
         } catch (Exception e) {
-            // Handle the exception appropriately, e.g., log it and return an error response
+
             return ResponseEntity.status(500).build();
         }
     }

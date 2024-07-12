@@ -2,7 +2,8 @@ package ma.autocash.booking.api.controller;
 
 import ma.autocash.booking.api.dto.ExpertDto;
 import ma.autocash.booking.api.exception.TechnicalException;
-import ma.autocash.booking.api.services.ExpertService;
+import ma.autocash.booking.api.service.ExpertService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,13 +27,20 @@ public class ExpertController {
     @Operation(summary = "Create a new Expert",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Expert created successfully",
+                            content = @Content(mediaType = "application/json")),
+                    @ApiResponse(responseCode = "400", description = "Invalid request",
+                            content = @Content(mediaType = "application/json")),
+                    @ApiResponse(responseCode = "500", description = "Internal server error",
                             content = @Content(mediaType = "application/json"))
             })
     public ResponseEntity<ExpertDto> saveExpert(@RequestBody ExpertDto expertDto) {
-        ExpertDto savedExpert = expertService.saveExpert(expertDto);
-        return ResponseEntity.ok(savedExpert);
+        try {
+            ExpertDto savedExpert = expertService.saveExpert(expertDto);
+            return ResponseEntity.ok(savedExpert);
+        } catch (TechnicalException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
-
     @PutMapping("/{id}")
     @Operation(summary = "Update an existing Expert by ID",
             responses = {
@@ -45,7 +53,7 @@ public class ExpertController {
             ExpertDto updatedExpert = expertService.updateExpert(id, expertDto);
             return ResponseEntity.ok(updatedExpert);
         } catch (TechnicalException e) {
-            // Handle the exception appropriately, e.g., return a 500 status code
+
             return ResponseEntity.status(500).build();
         }
     }
@@ -86,15 +94,16 @@ public class ExpertController {
         return ResponseEntity.ok(experts);
     }
 
-    @PutMapping("/{expertId}/assign-zone/{zoneId}")
-    @Operation(summary = "Assign a Zone to an Expert by IDs",
+
+    @PutMapping("/{expertId}/assign-zones")
+    @Operation(summary = "Assign a list of Zones to an Expert by ID",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Zone assigned to Expert successfully",
+                    @ApiResponse(responseCode = "200", description = "Zones assigned to Expert successfully",
                             content = @Content(mediaType = "application/json")),
                     @ApiResponse(responseCode = "404", description = "Expert or Zone not found")
             })
-    public ResponseEntity<ExpertDto> assignZoneToExpert(@PathVariable Long expertId, @PathVariable Long zoneId) {
-        ExpertDto updatedExpert = expertService.assignZoneToExpert(expertId, zoneId);
+    public ResponseEntity<ExpertDto> assignZonesToExpert(@PathVariable Long expertId, @RequestBody List<Long> zoneIds) {
+        ExpertDto updatedExpert = expertService.assignZonesToExpert(expertId, zoneIds);
         return ResponseEntity.ok(updatedExpert);
     }
 }

@@ -1,11 +1,9 @@
 package ma.autocash.booking.api.provider.impl;
 
-import lombok.SneakyThrows;
 import ma.autocash.booking.api.entity.Expert;
 import ma.autocash.booking.api.entity.Zone;
 import ma.autocash.booking.api.exception.BusinessException;
 import ma.autocash.booking.api.exception.KeyValueErrorImpl;
-import ma.autocash.booking.api.exception.TechnicalException;
 import ma.autocash.booking.api.provider.ExpertProvider;
 import ma.autocash.booking.api.repository.ExpertRepository;
 import ma.autocash.booking.api.repository.ZoneRepository;
@@ -14,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -27,19 +26,17 @@ public class ExpertProviderImpl implements ExpertProvider {
         this.zoneRepository = zoneRepository;
     }
 
-    @SneakyThrows
     @Override
-    public Expert saveExpert(Expert expert) throws TechnicalException {
+    public Expert saveExpert(Expert expert) throws BusinessException {
         try {
             return expertRepository.save(expert);
         } catch (Exception e) {
-            throw new TechnicalException("Error saving expert", e);
+            throw new BusinessException(new KeyValueErrorImpl("expert.cannot.be saved", 404, 404));
         }
     }
 
-    @SneakyThrows
     @Override
-    public Expert updateExpert(Expert expert) throws BusinessException, TechnicalException {
+    public Expert updateExpert(Expert expert) throws BusinessException {
         try {
             if (expertRepository.existsById(expert.getId())) {
                 return expertRepository.save(expert);
@@ -47,13 +44,12 @@ public class ExpertProviderImpl implements ExpertProvider {
                 throw new BusinessException(new KeyValueErrorImpl("expert.update.notfound", 404, 404));
             }
         } catch (Exception e) {
-            throw new TechnicalException("Error updating expert", e);
+            throw new BusinessException(new KeyValueErrorImpl("expert.cannot.be updated", 404, 404));
         }
     }
 
-    @SneakyThrows
     @Override
-    public void deleteExpert(Long id) throws BusinessException, TechnicalException {
+    public void deleteExpert(Long id) throws BusinessException {
         try {
             if (expertRepository.existsById(id)) {
                 expertRepository.deleteById(id);
@@ -61,48 +57,53 @@ public class ExpertProviderImpl implements ExpertProvider {
                 throw new BusinessException(new KeyValueErrorImpl("expert.delete.notfound", 404, 404));
             }
         } catch (Exception e) {
-            throw new TechnicalException("Error deleting expert", e);
+            throw new BusinessException(new KeyValueErrorImpl("expert.delete.notfound", 404, 404));
         }
     }
 
-    @SneakyThrows
     @Override
-    public List<Expert> getAllExperts() throws TechnicalException {
+    public List<Expert> getAllExperts() throws BusinessException {
         try {
             return expertRepository.findAll();
         } catch (Exception e) {
-            throw new TechnicalException("Error retrieving experts", e);
+            throw new BusinessException(new KeyValueErrorImpl("expert.get.notfound", 404, 404));
         }
     }
 
-    @SneakyThrows
     @Override
-    public Expert getExpertById(Long id) throws BusinessException, TechnicalException {
+    public Expert getExpertById(Long id) throws BusinessException {
         try {
             return expertRepository.findById(id)
                     .orElseThrow(() -> new BusinessException(new KeyValueErrorImpl("expert.get.notfound", 404, 404)));
         } catch (Exception e) {
-            throw new TechnicalException("Error retrieving expert by id", e);
+            throw new BusinessException(new KeyValueErrorImpl("expert.get.notfound", 404, 404));
         }
     }
 
-    @SneakyThrows
     @Override
-    public Expert assignZoneToExpert(Long expertId, Long zoneId) throws BusinessException, TechnicalException {
+    public Expert assignZonesToExpert(Long expertId, List<Long> zoneIds) throws BusinessException {
         try {
             Optional<Expert> expertOptional = expertRepository.findById(expertId);
-            Optional<Zone> zoneOptional = zoneRepository.findById(zoneId);
 
-            if (expertOptional.isPresent() && zoneOptional.isPresent()) {
+            if (expertOptional.isPresent()) {
                 Expert expert = expertOptional.get();
-                Zone zone = zoneOptional.get();
-                expert.getZones().add(zone);
+                List<Zone> zones = zoneIds.stream()
+                        .map(zoneId -> {
+                            try {
+                                return zoneRepository.findById(zoneId)
+                                        .orElseThrow(() -> new BusinessException(new KeyValueErrorImpl("zone.notfound", 404, 404)));
+                            } catch (BusinessException e) {
+                                throw new RuntimeException(e);
+                            }
+                        })
+                        .collect(Collectors.toList());
+                expert.setZones(zones);
                 return expertRepository.save(expert);
             } else {
-                throw new BusinessException(new KeyValueErrorImpl("expert.or.zone.notfound", 404, 404));
+                throw new BusinessException(new KeyValueErrorImpl("expert.notfound", 404, 404));
             }
         } catch (Exception e) {
-            throw new TechnicalException("Error assigning zone to expert", e);
+            throw new BusinessException(new KeyValueErrorImpl("expert.cannot.be assigned zones", 404, 404));
         }
     }
 }

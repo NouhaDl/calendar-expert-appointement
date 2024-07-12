@@ -8,15 +8,15 @@ import java.util.List;
 
 public interface ExpertProvider {
 
-    Expert saveExpert(Expert expert) throws TechnicalException;
+    Expert saveExpert(Expert expert) throws TechnicalException, BusinessException;
 
     Expert updateExpert(Expert expert) throws BusinessException, TechnicalException;
 
     void deleteExpert(Long id) throws BusinessException, TechnicalException;
 
-    List<Expert> getAllExperts() throws TechnicalException;
+    List<Expert> getAllExperts() throws TechnicalException, BusinessException;
 
     Expert getExpertById(Long id) throws BusinessException, TechnicalException;
 
-    Expert assignZoneToExpert(Long expertId, Long zoneId) throws BusinessException, TechnicalException;
+    Expert assignZonesToExpert(Long expertId, List<Long> zoneIds) throws BusinessException, TechnicalException;
 }

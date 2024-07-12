@@ -21,38 +21,56 @@ public class BookingProviderImpl implements BookingProvider {
     }
 
     @Override
-    public Booking saveBooking(Booking booking) {
-        return bookingRepository.save(booking);
+    public Booking saveBooking(Booking booking) throws BusinessException {
+        try {
+            return bookingRepository.save(booking);
+        } catch (Exception e) {
+            throw new BusinessException(new KeyValueErrorImpl("booking.cannot.be saved", 404, 404));
+        }
     }
 
     @Override
     public Booking updateBooking(Booking booking) throws BusinessException {
-        if (bookingRepository.existsById(booking.getId())) {
-            return bookingRepository.save(booking);
-        } else {
-            throw new BusinessException(new KeyValueErrorImpl("booking.update.notfound", 404, 404));
-
+        try {
+            if (bookingRepository.existsById(booking.getId())) {
+                return bookingRepository.save(booking);
+            } else {
+                throw new BusinessException(new KeyValueErrorImpl("booking.update.notfound", 404, 404));
+            }
+        } catch (Exception e) {
+            throw new BusinessException(new KeyValueErrorImpl("booking.cannot.be updated", 404, 404));
         }
     }
 
     @Override
     public void deleteBooking(Long id) throws BusinessException {
-        if (bookingRepository.existsById(id)) {
-            bookingRepository.deleteById(id);
-        } else {
+        try {
+            if (bookingRepository.existsById(id)) {
+                bookingRepository.deleteById(id);
+            } else {
+                throw new BusinessException(new KeyValueErrorImpl("booking.delete.notfound", 404, 404));
+            }
+        } catch (Exception e) {
             throw new BusinessException(new KeyValueErrorImpl("booking.delete.notfound", 404, 404));
-
         }
     }
 
     @Override
-    public List<Booking> getAllBookings() {
-        return bookingRepository.findAll();
+    public List<Booking> getAllBookings() throws BusinessException {
+        try {
+            return bookingRepository.findAll();
+        } catch (Exception e) {
+            throw new BusinessException(new KeyValueErrorImpl("booking.get.notfound", 404, 404));
+        }
     }
 
     @Override
     public Booking getBookingById(Long id) throws BusinessException {
-        return bookingRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(new KeyValueErrorImpl("booking.get.notfound", 404, 404)));
+        try {
+            return bookingRepository.findById(id)
+                    .orElseThrow(() -> new BusinessException(new KeyValueErrorImpl("booking.get.notfound", 404, 404)));
+        } catch (Exception e) {
+            throw new BusinessException(new KeyValueErrorImpl("booking.get.notfound", 404, 404));
+        }
     }
 }

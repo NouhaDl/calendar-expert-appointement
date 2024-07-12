@@ -2,7 +2,7 @@ package ma.autocash.booking.api.controller;
 
 import ma.autocash.booking.api.dto.BookingDto;
 import ma.autocash.booking.api.exception.TechnicalException;
-import ma.autocash.booking.api.services.BookingService;
+import ma.autocash.booking.api.service.BookingService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

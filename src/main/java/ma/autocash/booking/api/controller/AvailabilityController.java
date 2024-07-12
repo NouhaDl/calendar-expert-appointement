@@ -1,15 +1,16 @@
 package ma.autocash.booking.api.controller;
 
-import lombok.SneakyThrows;
+import io.swagger.v3.oas.annotations.media.Schema;
 import ma.autocash.booking.api.dto.AvailabilityDto;
 import ma.autocash.booking.api.exception.BusinessException;
 import ma.autocash.booking.api.exception.TechnicalException;
-import ma.autocash.booking.api.services.AvailabilityService;
+import ma.autocash.booking.api.service.AvailabilityService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -27,7 +28,6 @@ public class AvailabilityController {
         this.availabilityService = availabilityService;
     }
 
-    @SneakyThrows
     @PostMapping
     @Operation(summary = "Create a new Availability",
             responses = {
@@ -51,7 +51,6 @@ public class AvailabilityController {
         return ResponseEntity.ok(updatedAvailability);
     }
 
-    @SneakyThrows
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete an Availability by ID",
             responses = {
@@ -63,13 +62,11 @@ public class AvailabilityController {
         return ResponseEntity.noContent().build();
     }
 
-    @SneakyThrows
     @GetMapping("/{id}")
     @Operation(summary = "Get an Availability by ID",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Availability found",
-                            content = @Content(mediaType = "application/json")),
-                    @ApiResponse(responseCode = "404", description = "Availability not found")
+                            content = @Content(mediaType = "application/json"))
             })
     public ResponseEntity<AvailabilityDto> getAvailabilityById(@PathVariable Long id) throws BusinessException, TechnicalException {
         AvailabilityDto availability = availabilityService.getAvailabilityById(id);
@@ -82,18 +79,22 @@ public class AvailabilityController {
     @Operation(summary = "Get Availabilities by Expert ID and Time Range",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Availabilities found",
-                            content = @Content(mediaType = "application/json"))
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = AvailabilityDto.class)))
             })
-    public ResponseEntity<List<AvailabilityDto>> getAvailabilitiesByExpertAndDateAndTimeRange(
+    public ResponseEntity<List<AvailabilityDto>> getAvailabilitiesByExpertAndTimeRange(
             @RequestParam Long expertId,
-            @RequestParam LocalDate date,
-            @RequestParam LocalTime startTime,
-            @RequestParam LocalTime endTime
-    ) throws TechnicalException {
-        List<AvailabilityDto> availabilities = availabilityService.getAvailabilitiesByExpertAndDateAndTimeRange(expertId, date, startTime, endTime);
+            @RequestParam(required = false) LocalTime startTime,
+            @RequestParam(required = false) LocalTime endTime
+    ) {
+        List<AvailabilityDto> availabilities = null;
+        try {
+            availabilities = availabilityService.getAvailabilitiesByExpertAndTimeRange(expertId, startTime, endTime);
+        } catch (TechnicalException e) {
+            throw new RuntimeException(e);
+        }
         return ResponseEntity.ok(availabilities);
     }
-
     @GetMapping
     @Operation(summary = "Get all Availabilities",
             responses = {

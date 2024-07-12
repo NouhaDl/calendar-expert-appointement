@@ -1,4 +1,4 @@
-package ma.autocash.booking.api.services.impl;
+package ma.autocash.booking.api.service.impl;
 
 import ma.autocash.booking.api.dto.ExpertDto;
 import ma.autocash.booking.api.entity.Expert;
@@ -7,11 +7,12 @@ import ma.autocash.booking.api.exception.TechnicalException;
 import ma.autocash.booking.api.mapper.ExpertMapper;
 import ma.autocash.booking.api.repository.ExpertRepository;
 import ma.autocash.booking.api.repository.ZoneRepository;
-import ma.autocash.booking.api.services.ExpertService;
+import ma.autocash.booking.api.service.ExpertService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,12 +30,22 @@ public class ExpertServiceImpl implements ExpertService {
     }
 
     @Override
-    public ExpertDto saveExpert(ExpertDto expertDto) {
-        Expert expert = expertMapper.toEntity(expertDto);
-        Expert savedExpert = expertRepository.save(expert);
-        ExpertDto savedExpertDto = expertMapper.toDto(savedExpert);
-        savedExpertDto.setId(savedExpert.getId());
-        return savedExpertDto;
+    public ExpertDto saveExpert(ExpertDto expertDto) throws TechnicalException {
+        try {
+            Objects.requireNonNull(expertDto, "ExpertDto must not be null");
+            Objects.requireNonNull(expertDto.getFirstName(), "Expert first name must not be null");
+            Objects.requireNonNull(expertDto.getLastName(), "Expert last name must not be null");
+
+            Expert expertEntity = expertMapper.toEntity(expertDto);
+            Expert savedExpert = expertRepository.save(expertEntity);
+
+            ExpertDto savedExpertDto = expertMapper.toDto(savedExpert);
+            savedExpertDto.setId(savedExpert.getId());
+
+            return savedExpertDto;
+        } catch (Exception e) {
+            throw new TechnicalException("Error saving expert", e);
+        }
     }
 
     @Override

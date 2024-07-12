@@ -1,13 +1,12 @@
-package ma.autocash.booking.api.services.impl;
+package ma.autocash.booking.api.service.impl;
 
-import lombok.SneakyThrows;
 import ma.autocash.booking.api.dto.ZoneDto;
 import ma.autocash.booking.api.entity.Zone;
 import ma.autocash.booking.api.exception.KeyValueErrorImpl;
 import ma.autocash.booking.api.exception.TechnicalException;
 import ma.autocash.booking.api.mapper.ZoneMapper;
 import ma.autocash.booking.api.repository.ZoneRepository;
-import ma.autocash.booking.api.services.ZoneService;
+import ma.autocash.booking.api.service.ZoneService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

@@ -1,4 +1,4 @@
-package ma.autocash.booking.api.services;
+package ma.autocash.booking.api.service;
 
 import ma.autocash.booking.api.dto.AvailabilityDto;
 import ma.autocash.booking.api.exception.BusinessException;
@@ -22,5 +22,6 @@ public interface AvailabilityService {
 
     List<AvailabilityDto> getAllAvailabilities() throws TechnicalException;
 
-    List<AvailabilityDto> getAvailabilitiesByExpertAndDateAndTimeRange(Long expertId, LocalDate date, LocalTime startTime, LocalTime endTime) throws TechnicalException;
+
+    List<AvailabilityDto> getAvailabilitiesByExpertAndTimeRange(Long expertId, LocalTime startTime, LocalTime endTime) throws TechnicalException;
 }

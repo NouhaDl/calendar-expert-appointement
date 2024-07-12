@@ -1,4 +1,4 @@
-package ma.autocash.booking.api.services;
+package ma.autocash.booking.api.service;
 
 import ma.autocash.booking.api.dto.ZoneDto;
 import ma.autocash.booking.api.exception.TechnicalException;
