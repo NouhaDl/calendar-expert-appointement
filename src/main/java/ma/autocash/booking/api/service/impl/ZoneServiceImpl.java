@@ -57,7 +57,7 @@ public class ZoneServiceImpl implements ZoneService {
 
             return zoneMapper.toDto(existingZone);
         } catch (TechnicalException e) {
-            throw e; // Re-throwing TechnicalException to propagate it
+            throw e;
         } catch (Exception e) {
             throw new TechnicalException("Error updating zone", e);
         }
@@ -72,7 +72,7 @@ public class ZoneServiceImpl implements ZoneService {
                 throw new TechnicalException(new KeyValueErrorImpl("zone.delete.notfound", 404, 404));
             }
         } catch (TechnicalException e) {
-            throw e; // Re-throwing TechnicalException to propagate it
+            throw e;
         } catch (Exception e) {
             throw new TechnicalException("Error deleting zone", e);
         }
@@ -97,7 +97,7 @@ public class ZoneServiceImpl implements ZoneService {
                     .orElseThrow(() -> new TechnicalException(new KeyValueErrorImpl("zone.notfound", 404, 404)));
             return zoneMapper.toDto(zone);
         } catch (TechnicalException e) {
-            throw e; // Re-throwing TechnicalException to propagate it
+            throw e;
         } catch (Exception e) {
             throw new TechnicalException("Error retrieving zone by id", e);
         }

@@ -1,5 +1,5 @@
 package ma.autocash.booking.api.services.impl;
-import lombok.SneakyThrows;
+
 import ma.autocash.booking.api.dto.ExpertDto;
 import ma.autocash.booking.api.entity.Expert;
 import ma.autocash.booking.api.entity.Zone;
@@ -77,14 +77,16 @@ public class ExpertServiceImpl implements ExpertService {
     }
 
     @Override
-    public ExpertDto assignZoneToExpert(Long expertId, Long zoneId) {
+    public ExpertDto assignZonesToExpert(Long expertId, List<Long> zoneIds) {
         Expert expert = expertRepository.findById(expertId)
                 .orElseThrow(() -> new RuntimeException("Expert not found with id: " + expertId));
 
-        Zone zone = zoneRepository.findById(zoneId)
-                .orElseThrow(() -> new RuntimeException("Zone not found with id: " + zoneId));
+        List<Zone> zones = zoneIds.stream()
+                .map(zoneId -> zoneRepository.findById(zoneId)
+                        .orElseThrow(() -> new RuntimeException("Zone not found with id: " + zoneId)))
+                .toList();
 
-        expert.getZones().add(zone);
+        expert.getZones().addAll(zones);
 
         Expert updatedExpert = expertRepository.save(expert);
 

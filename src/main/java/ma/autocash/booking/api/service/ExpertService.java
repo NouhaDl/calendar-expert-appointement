@@ -17,5 +17,5 @@ public interface ExpertService {
 
     ExpertDto getExpertById(Long id);
 
-    ExpertDto assignZoneToExpert(Long expertId, Long zoneId);
+    ExpertDto assignZonesToExpert(Long expertId, List<Long> zoneIds);
 }
