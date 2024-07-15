@@ -3,7 +3,7 @@ package ma.autocash.booking.api.entity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
 
-import jakarta.persistence.*;
+import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 

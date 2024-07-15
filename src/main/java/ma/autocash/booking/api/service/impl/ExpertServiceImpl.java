@@ -2,7 +2,11 @@ package ma.autocash.booking.api.service.impl;
 
 import ma.autocash.booking.api.dto.ExpertDto;
 import ma.autocash.booking.api.entity.Expert;
+import ma.autocash.booking.api.entity.Availability;
+import ma.autocash.booking.api.entity.Booking;
 import ma.autocash.booking.api.entity.Zone;
+import ma.autocash.booking.api.exception.EntityNotFoundException;
+import ma.autocash.booking.api.exception.KeyValueErrorImpl;
 import ma.autocash.booking.api.exception.TechnicalException;
 import ma.autocash.booking.api.mapper.ExpertMapper;
 import ma.autocash.booking.api.repository.ExpertRepository;
@@ -11,8 +15,9 @@ import ma.autocash.booking.api.service.ExpertService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,35 +35,28 @@ public class ExpertServiceImpl implements ExpertService {
     }
 
     @Override
-    public ExpertDto saveExpert(ExpertDto expertDto) throws TechnicalException {
+    public ExpertDto saveExpert(@Valid ExpertDto expertDto) throws TechnicalException {
         try {
-            Objects.requireNonNull(expertDto, "ExpertDto must not be null");
-            Objects.requireNonNull(expertDto.getFirstName(), "Expert first name must not be null");
-            Objects.requireNonNull(expertDto.getLastName(), "Expert last name must not be null");
-
             Expert expertEntity = expertMapper.toEntity(expertDto);
             Expert savedExpert = expertRepository.save(expertEntity);
-
-            ExpertDto savedExpertDto = expertMapper.toDto(savedExpert);
-            savedExpertDto.setId(savedExpert.getId());
-
-            return savedExpertDto;
+            return expertMapper.toDto(savedExpert);
         } catch (Exception e) {
-            throw new TechnicalException("Error saving expert", e);
+            throw new TechnicalException(new KeyValueErrorImpl("expert.cannot.be saved", 404, 404));
         }
     }
 
     @Override
-    public ExpertDto updateExpert(Long id, ExpertDto expertDto) throws TechnicalException {
+    public ExpertDto updateExpert(Long id, @Valid ExpertDto expertDto) throws TechnicalException {
         try {
             Expert existingExpert = expertRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Expert not found with id: " + id));
+                    .orElseThrow(() -> new TechnicalException(new KeyValueErrorImpl("expert.cannot.be updated", 404, 404)));
+
 
             existingExpert.setFirstName(expertDto.getFirstName());
             existingExpert.setLastName(expertDto.getLastName());
-            existingExpert.setZoneIds(expertDto.getZoneIds());
-            existingExpert.setBookingIds(expertDto.getBookingIds());
-            existingExpert.setAvailabilityIds(expertDto.getAvailabilityIds());
+            updateExpertZones(existingExpert, expertDto.getZoneIds());
+            updateExpertBookings(existingExpert, expertDto.getBookingIds());
+            updateExpertAvailabilities(existingExpert, expertDto.getAvailabilityIds());
 
             Expert updatedExpert = expertRepository.save(existingExpert);
             return expertMapper.toDto(updatedExpert);
@@ -68,8 +66,12 @@ public class ExpertServiceImpl implements ExpertService {
     }
 
     @Override
-    public void deleteExpert(Long id) {
-        expertRepository.deleteById(id);
+    public void deleteExpert(Long id) throws TechnicalException {
+        try {
+            expertRepository.deleteById(id);
+        } catch (Exception e) {
+            throw new TechnicalException(new KeyValueErrorImpl("expert.cannot.be deleted", 404, 404));
+        }
     }
 
     @Override
@@ -83,24 +85,72 @@ public class ExpertServiceImpl implements ExpertService {
     @Override
     public ExpertDto getExpertById(Long id) {
         Expert expert = expertRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Expert not found with id: " + id));
+                .orElseThrow(() ->new EntityNotFoundException("Expert",id));
+
         return expertMapper.toDto(expert);
     }
 
     @Override
-    public ExpertDto assignZonesToExpert(Long expertId, List<Long> zoneIds) {
-        Expert expert = expertRepository.findById(expertId)
-                .orElseThrow(() -> new RuntimeException("Expert not found with id: " + expertId));
+    public ExpertDto assignZonesToExpert(Long expertId, List<Long> zoneIds) throws EntityNotFoundException, TechnicalException {
+        try {
+            Expert expert = expertRepository.findById(expertId)
+                    .orElseThrow(() -> new EntityNotFoundException("Expert", expertId));
 
-        List<Zone> zones = zoneIds.stream()
-                .map(zoneId -> zoneRepository.findById(zoneId)
-                        .orElseThrow(() -> new RuntimeException("Zone not found with id: " + zoneId)))
-                .toList();
+            List<Zone> zones = zoneRepository.findAllById(zoneIds);
+            expert.getZones().addAll(zones);
 
-        expert.getZones().addAll(zones);
+            Expert updatedExpert = expertRepository.save(expert);
+            return expertMapper.toDto(updatedExpert);
+        } catch (EntityNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new TechnicalException("Failed to assign zones to expert", e);
+        }
+    }
 
-        Expert updatedExpert = expertRepository.save(expert);
 
-        return expertMapper.toDto(updatedExpert);
+    private void updateExpertZones(@NotNull Expert expert, List<Long> zoneIds) {
+        if (zoneIds != null) {
+            List<Zone> zones = zoneRepository.findAllById(zoneIds);
+            expert.setZones(zones);
+        } else {
+            expert.setZones(null);
+        }
+    }
+
+    private void updateExpertBookings(@NotNull Expert expert, List<Long> bookingIds) {
+        if (bookingIds != null) {
+            List<Booking> bookings = bookingIds.stream()
+                    .map(bookingId -> {
+                        Booking booking = expert.getBookings().stream()
+                                .filter(b -> b.getId().equals(bookingId))
+                                .findFirst()
+                                .orElseGet(Booking::new);
+
+                        return booking;
+                    })
+                    .toList();
+            expert.setBookings(bookings);
+        } else {
+            expert.setBookings(null);
+        }
+    }
+
+    private void updateExpertAvailabilities(@NotNull Expert expert, List<Long> availabilityIds) {
+        if (availabilityIds != null) {
+            List<Availability> availabilities = availabilityIds.stream()
+                    .map(availabilityId -> {
+                        Availability availability = expert.getAvailabilities().stream()
+                                .filter(a -> a.getId().equals(availabilityId))
+                                .findFirst()
+                                .orElseGet(Availability::new);
+
+                        return availability;
+                    })
+                    .toList();
+            expert.setAvailabilities(availabilities);
+        } else {
+            expert.setAvailabilities(null);
+        }
     }
 }

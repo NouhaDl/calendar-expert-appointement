@@ -11,11 +11,11 @@ public interface ExpertService {
 
     ExpertDto updateExpert(Long id, ExpertDto expertDto) throws TechnicalException;
 
-    void deleteExpert(Long id);
+    void deleteExpert(Long id) throws TechnicalException;
 
     List<ExpertDto> getAllExperts();
 
     ExpertDto getExpertById(Long id);
 
-    ExpertDto assignZonesToExpert(Long expertId, List<Long> zoneIds);
+    ExpertDto assignZonesToExpert(Long expertId, List<Long> zoneIds) throws TechnicalException;
 }

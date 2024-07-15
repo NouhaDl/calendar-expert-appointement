@@ -14,36 +14,5 @@ public class ZoneDto {
     private String name;
     private List<Long> expertIds;
     private List<Long> bookingIds;
-//lombok
-    public Long getId() {
-        return id;
-    }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public List<Long> getExpertIds() {
-        return expertIds;
-    }
-
-    public void setExpertIds(List<Long> expertIds) {
-        this.expertIds = expertIds;
-    }
-
-    public List<Long> getBookingIds() {
-        return bookingIds;
-    }
-
-    public void setBookingIds(List<Long> bookingIds) {
-        this.bookingIds = bookingIds;
-    }
 }

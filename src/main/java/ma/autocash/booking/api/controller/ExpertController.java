@@ -6,7 +6,8 @@ import ma.autocash.booking.api.service.ExpertService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import ma.autocash.booking.api.exception.EntityNotFoundException;
+import jakarta.validation.Valid;
 import java.util.List;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,14 +34,15 @@ public class ExpertController {
                     @ApiResponse(responseCode = "500", description = "Internal server error",
                             content = @Content(mediaType = "application/json"))
             })
-    public ResponseEntity<ExpertDto> saveExpert(@RequestBody ExpertDto expertDto) {
+    public ResponseEntity<ExpertDto> saveExpert(@Valid @RequestBody ExpertDto expertDto) {
         try {
             ExpertDto savedExpert = expertService.saveExpert(expertDto);
             return ResponseEntity.ok(savedExpert);
         } catch (TechnicalException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
     @PutMapping("/{id}")
     @Operation(summary = "Update an existing Expert by ID",
             responses = {
@@ -48,13 +50,13 @@ public class ExpertController {
                             content = @Content(mediaType = "application/json")),
                     @ApiResponse(responseCode = "404", description = "Expert not found")
             })
-    public ResponseEntity<ExpertDto> updateExpert(@PathVariable Long id, @RequestBody ExpertDto expertDto) {
+    public ResponseEntity<ExpertDto> updateExpert(@PathVariable Long id, @Valid @RequestBody ExpertDto expertDto) {
         try {
             ExpertDto updatedExpert = expertService.updateExpert(id, expertDto);
             return ResponseEntity.ok(updatedExpert);
         } catch (TechnicalException e) {
 
-            return ResponseEntity.status(500).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
@@ -65,8 +67,15 @@ public class ExpertController {
                     @ApiResponse(responseCode = "404", description = "Expert not found")
             })
     public ResponseEntity<Void> deleteExpert(@PathVariable Long id) {
-        expertService.deleteExpert(id);
-        return ResponseEntity.noContent().build();
+        try {
+            expertService.deleteExpert(id);
+            return ResponseEntity.noContent().build();
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (TechnicalException e) {
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @GetMapping("/{id}")
@@ -100,10 +109,17 @@ public class ExpertController {
             responses = {
                     @ApiResponse(responseCode = "200", description = "Zones assigned to Expert successfully",
                             content = @Content(mediaType = "application/json")),
-                    @ApiResponse(responseCode = "404", description = "Expert or Zone not found")
+                    @ApiResponse(responseCode = "404", description = "Expert not found or other technical issues")
             })
-    public ResponseEntity<ExpertDto> assignZonesToExpert(@PathVariable Long expertId, @RequestBody List<Long> zoneIds) {
-        ExpertDto updatedExpert = expertService.assignZonesToExpert(expertId, zoneIds);
-        return ResponseEntity.ok(updatedExpert);
+    public ResponseEntity<ExpertDto> assignZonesToExpertController(@PathVariable Long expertId, @RequestBody List<Long> zoneIds) {
+        try {
+            ExpertDto updatedExpert = expertService.assignZonesToExpert(expertId, zoneIds);
+            return ResponseEntity.ok(updatedExpert);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+
+        } catch (TechnicalException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 }

@@ -44,12 +44,12 @@ public class BookingServiceImpl implements BookingService {
 
     @SneakyThrows
     @Override
-    public BookingDto saveBooking(BookingDto bookingDto) {
-        try {
-            Objects.requireNonNull(bookingDto, "BookingDto must not be null");
-            Objects.requireNonNull(bookingDto.getExpertId(), "Expert ID must not be null");
-            Objects.requireNonNull(bookingDto.getZoneId(), "Zone ID must not be null");
+    public BookingDto saveBooking(BookingDto bookingDto) throws TechnicalException {
+        Objects.requireNonNull(bookingDto, "BookingDto must not be null");
+        Objects.requireNonNull(bookingDto.getExpertId(), "Expert ID must not be null");
+        Objects.requireNonNull(bookingDto.getZoneId(), "Zone ID must not be null");
 
+        try {
             Expert expert = expertRepository.findById(bookingDto.getExpertId())
                     .orElseThrow(() -> new BusinessException(new KeyValueErrorImpl("booking.save.expert.notfound", 404, 404)));
 
@@ -70,14 +70,15 @@ public class BookingServiceImpl implements BookingService {
             savedBookingDto.setId(savedBooking.getId());
 
             return savedBookingDto;
+        } catch (BusinessException e) {
+            throw e;
         } catch (Exception e) {
-            throw new TechnicalException("Error saving booking", e);
+            throw new TechnicalException("Error saving booking", e); // Wrap other exceptions in TechnicalException
         }
     }
 
-    @SneakyThrows
     @Override
-    public BookingDto updateBooking(Long id, BookingDto bookingDto) {
+    public BookingDto updateBooking(Long id, BookingDto bookingDto) throws TechnicalException, BusinessException {
         Objects.requireNonNull(id, "Booking ID must not be null");
         Objects.requireNonNull(bookingDto, "BookingDto must not be null");
 
@@ -106,15 +107,15 @@ public class BookingServiceImpl implements BookingService {
 
             return bookingMapper.toDto(updatedBooking);
         } catch (BusinessException e) {
-            throw new TechnicalException("BusinessException occurred while updating booking", e);
+            throw e; // Rethrow BusinessException to caller
         } catch (TechnicalException | IllegalArgumentException e) {
-            throw e;
+            throw e; // Rethrow TechnicalException and IllegalArgumentException to caller
         } catch (Exception e) {
-            throw new TechnicalException("Error updating booking", e);
+            throw new TechnicalException("Error updating booking", e); // Wrap other exceptions in TechnicalException
         }
     }
 
-    private void updateBookingEntity(Booking booking, BookingDto bookingDto) throws TechnicalException {
+    private void updateBookingEntity(Booking booking, BookingDto bookingDto) throws TechnicalException, BusinessException {
         try {
             if (bookingDto.getBookingDate() != null) {
                 booking.setBookingDate(bookingDto.getBookingDate());
@@ -139,14 +140,15 @@ public class BookingServiceImpl implements BookingService {
                         .orElseThrow(() -> new BusinessException(new KeyValueErrorImpl("booking.update.zone.notfound", 404, 404)));
                 booking.setZone(zone);
             }
+        } catch (BusinessException e) {
+            throw e; // Rethrow BusinessException to caller
         } catch (Exception e) {
-            throw new TechnicalException("Error updating booking entity", e);
+            throw new TechnicalException("Error updating booking entity", e); // Wrap other exceptions in TechnicalException
         }
     }
 
-    @SneakyThrows
     @Override
-    public void deleteBooking(Long id) {
+    public void deleteBooking(Long id) throws TechnicalException, BusinessException {
         Objects.requireNonNull(id, "Booking ID must not be null");
 
         try {
@@ -166,27 +168,26 @@ public class BookingServiceImpl implements BookingService {
                     booking.getExpert().getId(), booking.getBookingDate(),
                     booking.getStartTime(), booking.getEndTime());
         } catch (BusinessException e) {
-            throw new TechnicalException("BusinessException occurred while deleting booking", e);
+            throw e; // Rethrow BusinessException to caller
         } catch (Exception e) {
-            throw new TechnicalException("Error deleting booking", e);
+            throw new TechnicalException("Error deleting booking", e); // Wrap other exceptions in TechnicalException
         }
     }
 
-    @SneakyThrows
     @Override
-    public List<BookingDto> getAllBookings() {
+    public List<BookingDto> getAllBookings() throws TechnicalException {
         try {
             List<Booking> bookings = bookingRepository.findAll();
             return bookings.stream()
                     .map(bookingMapper::toDto)
                     .collect(Collectors.toList());
         } catch (Exception e) {
-            throw new TechnicalException("Error retrieving bookings", e);
+            throw new TechnicalException("Error retrieving bookings", e); // Wrap other exceptions in TechnicalException
         }
     }
 
     @Override
-    public BookingDto getBookingById(Long id) throws TechnicalException {
+    public BookingDto getBookingById(Long id) throws TechnicalException, BusinessException {
         Objects.requireNonNull(id, "Booking ID must not be null");
 
         try {
@@ -195,9 +196,9 @@ public class BookingServiceImpl implements BookingService {
 
             return bookingMapper.toDto(booking);
         } catch (BusinessException e) {
-            throw new TechnicalException("BusinessException occurred while retrieving booking by id", e);
+            throw e; // Rethrow BusinessException to caller
         } catch (Exception e) {
-            throw new TechnicalException("Error retrieving booking by id", e);
+            throw new TechnicalException("Error retrieving booking by id", e); // Wrap other exceptions in TechnicalException
         }
     }
 }

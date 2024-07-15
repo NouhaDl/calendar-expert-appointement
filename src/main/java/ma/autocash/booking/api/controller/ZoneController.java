@@ -27,7 +27,7 @@ public class ZoneController {
                     @ApiResponse(responseCode = "200", description = "Zone created successfully",
                             content = @Content(mediaType = "application/json"))
             })
-    public ResponseEntity<ZoneDto> saveZone(@RequestBody ZoneDto zoneDto) {
+    public ResponseEntity<ZoneDto> saveZone(  @RequestBody ZoneDto zoneDto) {
         try {
             ZoneDto savedZone = zoneService.saveZone(zoneDto);
             return ResponseEntity.ok(savedZone);
