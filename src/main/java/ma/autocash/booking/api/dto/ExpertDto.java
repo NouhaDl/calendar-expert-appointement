@@ -1,5 +1,7 @@
 package ma.autocash.booking.api.dto;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.util.List;
@@ -7,13 +9,24 @@ import java.util.List;
 @Data
 public class ExpertDto {
     private Long id;
-    private String firstName;
-    private String lastName;
-    private List<Long> zoneIds;
-    private List<Long> availabilityIds;
-    private List<Long> bookingIds;
 
-    // Getters and Setters
+    @NotNull(message = "First name must not be null")
+    @Size(min = 1, message = "First name must not be empty")
+    private String firstName;
+
+    @NotNull(message = "Last name must not be null")
+    @Size(min = 1, message = "Last name must not be empty")
+    private String lastName;
+
+
+    private List<Long> zoneIds;
+
+
+    private List<Long> availabilityIds;
+
+
+    private List<Long> bookingIds;
+    // Getters and setters if Lombok doesn't work
     public Long getId() {
         return id;
     }

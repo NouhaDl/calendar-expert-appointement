@@ -1,13 +1,11 @@
 package ma.autocash.booking.api.service.impl;
 
-import lombok.SneakyThrows;
 import ma.autocash.booking.api.dto.AvailabilityDto;
 import ma.autocash.booking.api.dto.BookingDto;
 import ma.autocash.booking.api.entity.Booking;
 import ma.autocash.booking.api.entity.Expert;
 import ma.autocash.booking.api.entity.Zone;
-import ma.autocash.booking.api.exception.BusinessException;
-import ma.autocash.booking.api.exception.KeyValueErrorImpl;
+import ma.autocash.booking.api.exception.EntityNotFoundException;
 import ma.autocash.booking.api.exception.TechnicalException;
 import ma.autocash.booking.api.mapper.BookingMapper;
 import ma.autocash.booking.api.repository.BookingRepository;
@@ -18,6 +16,7 @@ import ma.autocash.booking.api.service.BookingService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -42,19 +41,18 @@ public class BookingServiceImpl implements BookingService {
         this.availabilityService = availabilityService;
     }
 
-    @SneakyThrows
     @Override
-    public BookingDto saveBooking(BookingDto bookingDto) {
+    public BookingDto saveBooking(@Valid BookingDto bookingDto) throws TechnicalException {
         try {
             Objects.requireNonNull(bookingDto, "BookingDto must not be null");
             Objects.requireNonNull(bookingDto.getExpertId(), "Expert ID must not be null");
             Objects.requireNonNull(bookingDto.getZoneId(), "Zone ID must not be null");
 
             Expert expert = expertRepository.findById(bookingDto.getExpertId())
-                    .orElseThrow(() -> new BusinessException(new KeyValueErrorImpl("booking.save.expert.notfound", 404, 404)));
+                    .orElseThrow(() -> new EntityNotFoundException("Expert", bookingDto.getExpertId()));
 
             Zone zone = zoneRepository.findById(bookingDto.getZoneId())
-                    .orElseThrow(() -> new BusinessException(new KeyValueErrorImpl("booking.save.zone.notfound", 404, 404)));
+                    .orElseThrow(() -> new EntityNotFoundException("Zone", bookingDto.getZoneId()));
 
             Booking bookingEntity = bookingMapper.toEntity(bookingDto);
             bookingEntity.setExpert(expert);
@@ -62,9 +60,18 @@ public class BookingServiceImpl implements BookingService {
 
             Booking savedBooking = bookingRepository.save(bookingEntity);
 
+            // Delete overlapping availabilities for the booked expert and time range
             availabilityService.deleteAvailabilitiesByExpertAndDateAndTimeRange(
                     bookingDto.getExpertId(), bookingDto.getBookingDate(),
                     bookingDto.getStartTime(), bookingDto.getEndTime());
+
+            // Optionally, save new availability for the booked time slot
+            AvailabilityDto newAvailabilityDto = new AvailabilityDto();
+            newAvailabilityDto.setExpertId(bookingDto.getExpertId());
+            newAvailabilityDto.setDate(bookingDto.getBookingDate());
+            newAvailabilityDto.setStartTime(bookingDto.getStartTime());
+            newAvailabilityDto.setEndTime(bookingDto.getEndTime());
+            availabilityService.saveAvailability(newAvailabilityDto);
 
             BookingDto savedBookingDto = bookingMapper.toDto(savedBooking);
             savedBookingDto.setId(savedBooking.getId());
@@ -75,16 +82,13 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    @SneakyThrows
     @Override
-    public BookingDto updateBooking(Long id, BookingDto bookingDto) {
-        Objects.requireNonNull(id, "Booking ID must not be null");
-        Objects.requireNonNull(bookingDto, "BookingDto must not be null");
-
+    public BookingDto updateBooking(Long id, @Valid BookingDto bookingDto) throws TechnicalException {
         try {
             Booking existingBooking = bookingRepository.findById(id)
-                    .orElseThrow(() -> new BusinessException(new KeyValueErrorImpl("booking.update.notfound", 404, 404)));
+                    .orElseThrow(() -> new EntityNotFoundException("Booking", id));
 
+            // Save the existing availability before updating
             AvailabilityDto oldAvailabilityDto = new AvailabilityDto();
             oldAvailabilityDto.setExpertId(existingBooking.getExpert().getId());
             oldAvailabilityDto.setDate(existingBooking.getBookingDate());
@@ -92,10 +96,13 @@ public class BookingServiceImpl implements BookingService {
             oldAvailabilityDto.setEndTime(existingBooking.getEndTime());
             availabilityService.saveAvailability(oldAvailabilityDto);
 
+            // Update booking entity fields
             updateBookingEntity(existingBooking, bookingDto);
 
+            // Save the updated booking
             Booking updatedBooking = bookingRepository.save(existingBooking);
 
+            // Delete old and new overlapping availabilities
             availabilityService.deleteAvailabilitiesByExpertAndDateAndTimeRange(
                     existingBooking.getExpert().getId(), existingBooking.getBookingDate(),
                     existingBooking.getStartTime(), existingBooking.getEndTime());
@@ -105,54 +112,20 @@ public class BookingServiceImpl implements BookingService {
                     bookingDto.getStartTime(), bookingDto.getEndTime());
 
             return bookingMapper.toDto(updatedBooking);
-        } catch (BusinessException e) {
-            throw new TechnicalException("BusinessException occurred while updating booking", e);
-        } catch (TechnicalException | IllegalArgumentException e) {
+        } catch (EntityNotFoundException e) {
             throw e;
         } catch (Exception e) {
             throw new TechnicalException("Error updating booking", e);
         }
     }
 
-    private void updateBookingEntity(Booking booking, BookingDto bookingDto) throws TechnicalException {
-        try {
-            if (bookingDto.getBookingDate() != null) {
-                booking.setBookingDate(bookingDto.getBookingDate());
-            }
-
-            if (bookingDto.getStartTime() != null) {
-                booking.setStartTime(bookingDto.getStartTime());
-            }
-
-            if (bookingDto.getEndTime() != null) {
-                booking.setEndTime(bookingDto.getEndTime());
-            }
-
-            if (bookingDto.getExpertId() != null && !Objects.equals(booking.getExpert().getId(), bookingDto.getExpertId())) {
-                Expert expert = expertRepository.findById(bookingDto.getExpertId())
-                        .orElseThrow(() -> new BusinessException(new KeyValueErrorImpl("booking.update.expert.notfound", 404, 404)));
-                booking.setExpert(expert);
-            }
-
-            if (bookingDto.getZoneId() != null && !Objects.equals(booking.getZone().getId(), bookingDto.getZoneId())) {
-                Zone zone = zoneRepository.findById(bookingDto.getZoneId())
-                        .orElseThrow(() -> new BusinessException(new KeyValueErrorImpl("booking.update.zone.notfound", 404, 404)));
-                booking.setZone(zone);
-            }
-        } catch (Exception e) {
-            throw new TechnicalException("Error updating booking entity", e);
-        }
-    }
-
-    @SneakyThrows
     @Override
-    public void deleteBooking(Long id) {
-        Objects.requireNonNull(id, "Booking ID must not be null");
-
+    public void deleteBooking(Long id) throws TechnicalException {
         try {
             Booking booking = bookingRepository.findById(id)
-                    .orElseThrow(() -> new BusinessException(new KeyValueErrorImpl("booking.delete.notfound", 404, 404)));
+                    .orElseThrow(() -> new EntityNotFoundException("Booking", id));
 
+            // Save availability before deleting booking
             AvailabilityDto availabilityDto = new AvailabilityDto();
             availabilityDto.setExpertId(booking.getExpert().getId());
             availabilityDto.setDate(booking.getBookingDate());
@@ -160,21 +133,22 @@ public class BookingServiceImpl implements BookingService {
             availabilityDto.setEndTime(booking.getEndTime());
             availabilityService.saveAvailability(availabilityDto);
 
+            // Delete booking
             bookingRepository.deleteById(id);
 
+            // Delete overlapping availabilities
             availabilityService.deleteAvailabilitiesByExpertAndDateAndTimeRange(
                     booking.getExpert().getId(), booking.getBookingDate(),
                     booking.getStartTime(), booking.getEndTime());
-        } catch (BusinessException e) {
-            throw new TechnicalException("BusinessException occurred while deleting booking", e);
+        } catch (EntityNotFoundException e) {
+            throw e;
         } catch (Exception e) {
             throw new TechnicalException("Error deleting booking", e);
         }
     }
 
-    @SneakyThrows
     @Override
-    public List<BookingDto> getAllBookings() {
+    public List<BookingDto> getAllBookings() throws TechnicalException {
         try {
             List<Booking> bookings = bookingRepository.findAll();
             return bookings.stream()
@@ -187,17 +161,36 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingDto getBookingById(Long id) throws TechnicalException {
-        Objects.requireNonNull(id, "Booking ID must not be null");
-
         try {
             Booking booking = bookingRepository.findById(id)
-                    .orElseThrow(() -> new BusinessException(new KeyValueErrorImpl("booking.get.notfound", 404, 404)));
-
+                    .orElseThrow(() -> new EntityNotFoundException("Booking", id));
             return bookingMapper.toDto(booking);
-        } catch (BusinessException e) {
-            throw new TechnicalException("BusinessException occurred while retrieving booking by id", e);
+        } catch (EntityNotFoundException e) {
+            throw e;
         } catch (Exception e) {
             throw new TechnicalException("Error retrieving booking by id", e);
+        }
+    }
+
+    private void updateBookingEntity(Booking booking, BookingDto bookingDto) {
+        if (bookingDto.getBookingDate() != null) {
+            booking.setBookingDate(bookingDto.getBookingDate());
+        }
+        if (bookingDto.getStartTime() != null) {
+            booking.setStartTime(bookingDto.getStartTime());
+        }
+        if (bookingDto.getEndTime() != null) {
+            booking.setEndTime(bookingDto.getEndTime());
+        }
+        if (bookingDto.getExpertId() != null && !Objects.equals(booking.getExpert().getId(), bookingDto.getExpertId())) {
+            Expert expert = expertRepository.findById(bookingDto.getExpertId())
+                    .orElseThrow(() -> new EntityNotFoundException("Expert", bookingDto.getExpertId()));
+            booking.setExpert(expert);
+        }
+        if (bookingDto.getZoneId() != null && !Objects.equals(booking.getZone().getId(), bookingDto.getZoneId())) {
+            Zone zone = zoneRepository.findById(bookingDto.getZoneId())
+                    .orElseThrow(() -> new EntityNotFoundException("Zone", bookingDto.getZoneId()));
+            booking.setZone(zone);
         }
     }
 }

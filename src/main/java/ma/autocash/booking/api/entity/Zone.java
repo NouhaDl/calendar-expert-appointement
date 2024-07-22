@@ -7,10 +7,9 @@ import lombok.*;
 import java.util.List;
 
 @Entity
-//@Table(name = "zone_details", schema = "expertises")
 @Getter
 @Setter
-@NoArgsConstructor
+
 @AllArgsConstructor
 public class Zone {
 
@@ -28,7 +27,22 @@ public class Zone {
  @OneToMany(mappedBy = "zone", cascade = CascadeType.ALL)
  private List<Booking> bookings;
 
- // Getters and Setters
+ public Zone() {
+
+ }
+ public Zone(Long id) {
+  this.id = id;
+ }
+
+ @Override
+ public String toString() {
+  return "Zone{" +
+          "id=" + id +
+          ", name='" + name + '\'' +
+          '}';
+ }
+
+ // Getters and setters if Lombok doesn't wor
  public Long getId() {
   return id;
  }
@@ -60,4 +74,7 @@ public class Zone {
  public void setBookings(List<Booking> bookings) {
   this.bookings = bookings;
  }
+
+
+
 }

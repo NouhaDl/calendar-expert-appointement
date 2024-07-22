@@ -2,6 +2,7 @@ package ma.autocash.booking.api.service.impl;
 
 import ma.autocash.booking.api.dto.AvailabilityDto;
 import ma.autocash.booking.api.entity.Availability;
+import ma.autocash.booking.api.entity.Expert;
 import ma.autocash.booking.api.exception.BusinessException;
 import ma.autocash.booking.api.exception.KeyValueErrorImpl;
 import ma.autocash.booking.api.exception.TechnicalException;
@@ -11,6 +12,7 @@ import ma.autocash.booking.api.service.AvailabilityService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -30,11 +32,13 @@ public class AvailabilityServiceImpl implements AvailabilityService {
     }
 
     @Override
-    public AvailabilityDto saveAvailability(AvailabilityDto availabilityDto) throws TechnicalException {
-        Objects.requireNonNull(availabilityDto, "AvailabilityDto must not be null");
+    public AvailabilityDto saveAvailability(@Valid AvailabilityDto availabilityDto) throws TechnicalException {
+        validateAvailabilityDto(availabilityDto);
 
         try {
             Availability availabilityEntity = availabilityMapper.toEntity(availabilityDto);
+            setExpertToAvailabilityEntity(availabilityDto, availabilityEntity);
+
             Availability savedAvailability = availabilityRepository.save(availabilityEntity);
             return availabilityMapper.toDto(savedAvailability);
         } catch (Exception e) {
@@ -43,33 +47,20 @@ public class AvailabilityServiceImpl implements AvailabilityService {
     }
 
     @Override
-    public AvailabilityDto updateAvailability(Long id, AvailabilityDto availabilityDto) throws TechnicalException {
-        Objects.requireNonNull(id, "Availability ID must not be null");
-        Objects.requireNonNull(availabilityDto, "AvailabilityDto must not be null");
+    public AvailabilityDto updateAvailability(Long id, @Valid AvailabilityDto availabilityDto) throws TechnicalException, BusinessException {
+        validateId(id);
+        validateAvailabilityDto(availabilityDto);
 
         try {
-
             Availability existingAvailability = availabilityRepository.findById(id)
                     .orElseThrow(() -> new BusinessException(new KeyValueErrorImpl("availability.get.notfound", 404, 404)));
 
-
-            if (availabilityDto.getExpertId() != null) {
-                existingAvailability.setExpertId(availabilityDto.getExpertId());
-            }
-            if (availabilityDto.getDate() != null) {
-                existingAvailability.setDate(availabilityDto.getDate());
-            }
-            if (availabilityDto.getStartTime() != null) {
-                existingAvailability.setStartTime(availabilityDto.getStartTime());
-            }
-            if (availabilityDto.getEndTime() != null) {
-                existingAvailability.setEndTime(availabilityDto.getEndTime());
-            }
+            updateAvailabilityEntity(existingAvailability, availabilityDto);
 
             Availability updatedAvailability = availabilityRepository.save(existingAvailability);
-
-
             return availabilityMapper.toDto(updatedAvailability);
+        } catch (BusinessException e) {
+            throw e;
         } catch (Exception e) {
             throw new TechnicalException("Error updating availability", e);
         }
@@ -77,7 +68,8 @@ public class AvailabilityServiceImpl implements AvailabilityService {
 
     @Override
     public void deleteAvailability(Long id) throws TechnicalException {
-        Objects.requireNonNull(id, "Availability ID must not be null");
+        validateId(id);
+
         try {
             availabilityRepository.deleteById(id);
         } catch (Exception e) {
@@ -86,12 +78,15 @@ public class AvailabilityServiceImpl implements AvailabilityService {
     }
 
     @Override
-    public AvailabilityDto getAvailabilityById(Long id) throws TechnicalException {
-        Objects.requireNonNull(id, "Availability ID must not be null");
+    public AvailabilityDto getAvailabilityById(Long id) throws TechnicalException, BusinessException {
+        validateId(id);
+
         try {
             Availability availabilityEntity = availabilityRepository.findById(id)
-                    .orElseThrow(() -> new BusinessException(new KeyValueErrorImpl("Availability.get.notfound", 404, 404)));
+                    .orElseThrow(() -> new BusinessException(new KeyValueErrorImpl("availability.get.notfound", 404, 404)));
             return availabilityMapper.toDto(availabilityEntity);
+        } catch (BusinessException e) {
+            throw e;
         } catch (Exception e) {
             throw new TechnicalException("Error retrieving availability by id", e);
         }
@@ -100,8 +95,7 @@ public class AvailabilityServiceImpl implements AvailabilityService {
     @Override
     public List<AvailabilityDto> getAllAvailabilities() throws TechnicalException {
         try {
-            List<Availability> availabilities = availabilityRepository.findAll();
-            return availabilities.stream()
+            return availabilityRepository.findAll().stream()
                     .map(availabilityMapper::toDto)
                     .collect(Collectors.toList());
         } catch (Exception e) {
@@ -111,14 +105,13 @@ public class AvailabilityServiceImpl implements AvailabilityService {
 
     @Override
     public List<AvailabilityDto> getAvailabilitiesByExpertAndTimeRange(Long expertId, LocalTime startTime, LocalTime endTime) throws TechnicalException {
-        Objects.requireNonNull(expertId, "Expert ID must not be null");
+        validateId(expertId);
 
         try {
             List<Availability> availabilities;
 
             if (startTime != null && endTime != null) {
-                availabilities = availabilityRepository.findByExpert_IdAndStartTimeBetween(
-                        expertId, startTime, endTime);
+                availabilities = availabilityRepository.findByExpert_IdAndStartTimeBetween(expertId, startTime, endTime);
             } else {
                 availabilities = availabilityRepository.findByExpert_Id(expertId);
             }
@@ -133,16 +126,51 @@ public class AvailabilityServiceImpl implements AvailabilityService {
 
     @Override
     public void deleteAvailabilitiesByExpertAndDateAndTimeRange(Long expertId, LocalDate date, LocalTime startTime, LocalTime endTime) throws TechnicalException {
-        Objects.requireNonNull(expertId, "Expert ID must not be null");
-        Objects.requireNonNull(date, "Date must not be null");
+        validateId(expertId);
+        validateDate(date);
 
         try {
-            List<Availability> availabilitiesToDelete = availabilityRepository.findByExpert_IdAndStartTimeBetween(
-                    expertId, startTime, endTime);
-
+            List<Availability> availabilitiesToDelete = availabilityRepository.findByExpert_IdAndStartTimeBetween(expertId, startTime, endTime);
             availabilityRepository.deleteAll(availabilitiesToDelete);
         } catch (Exception e) {
             throw new TechnicalException("Error deleting availabilities by expert and date/time range", e);
+        }
+    }
+
+    private void validateId(Long id) {
+        Objects.requireNonNull(id, "ID must not be null");
+    }
+
+    private void validateDate(LocalDate date) {
+        Objects.requireNonNull(date, "Date must not be null");
+    }
+
+    private void validateAvailabilityDto(AvailabilityDto availabilityDto) {
+        Objects.requireNonNull(availabilityDto, "AvailabilityDto must not be null");
+    }
+
+    private void setExpertToAvailabilityEntity(AvailabilityDto availabilityDto, Availability availabilityEntity) {
+        if (availabilityDto.getExpertId() != null) {
+            Expert expert = new Expert();
+            expert.setId(availabilityDto.getExpertId());
+            availabilityEntity.setExpert(expert);
+        }
+    }
+
+    private void updateAvailabilityEntity(Availability availability, AvailabilityDto availabilityDto) {
+        if (availabilityDto.getExpertId() != null) {
+            Expert expert = new Expert();
+            expert.setId(availabilityDto.getExpertId());
+            availability.setExpert(expert);
+        }
+        if (availabilityDto.getDate() != null) {
+            availability.setDate(availabilityDto.getDate());
+        }
+        if (availabilityDto.getStartTime() != null) {
+            availability.setStartTime(availabilityDto.getStartTime());
+        }
+        if (availabilityDto.getEndTime() != null) {
+            availability.setEndTime(availabilityDto.getEndTime());
         }
     }
 }

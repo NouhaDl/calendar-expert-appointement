@@ -8,10 +8,10 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Entity
-//@Table(name = "availability_details", schema = "expertises")
+@Table(name = "availability")
 @Getter
 @Setter
-@NoArgsConstructor
+
 @AllArgsConstructor
 public class Availability {
 
@@ -21,7 +21,7 @@ public class Availability {
 
     @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "expert_id")
+    @JoinColumn(name = "expert_id", referencedColumnName = "id")
     private Expert expert;
 
     @Column(name = "date")
@@ -33,7 +33,16 @@ public class Availability {
     @Column(name = "end_time")
     private LocalTime endTime;
 
-    // Getters and Setters
+
+    public Availability(Long id) {
+        this.id = id;
+    }
+
+    public Availability() {
+    }
+
+
+    // Getters and setters if Lombok doesn't wor
     public Long getId() {
         return id;
     }
@@ -72,9 +81,5 @@ public class Availability {
 
     public void setEndTime(LocalTime endTime) {
         this.endTime = endTime;
-    }
-
-    public void setExpertId(Long expertId) {
-
     }
 }

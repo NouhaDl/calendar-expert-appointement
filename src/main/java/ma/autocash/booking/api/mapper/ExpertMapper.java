@@ -11,14 +11,11 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.mapstruct.Named;
 
-
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 public interface ExpertMapper {
-
-
 
     @Mappings({
             @Mapping(source = "zones", target = "zoneIds", qualifiedByName = "extractZoneIds"),
@@ -28,49 +25,63 @@ public interface ExpertMapper {
     ExpertDto toDto(Expert expert);
 
     @Mappings({
-            @Mapping(target = "zones", ignore = true),
-            @Mapping(target = "availabilities", ignore = true),
-            @Mapping(target = "bookings", ignore = true)
+            @Mapping(target = "zones", source = "zoneIds", qualifiedByName = "mapZoneIdsToZones"),
+            @Mapping(target = "availabilities", source = "availabilityIds", qualifiedByName = "mapAvailabilityIdsToAvailabilities"),
+            @Mapping(target = "bookings", source = "bookingIds", qualifiedByName = "mapBookingIdsToBookings")
     })
     Expert toEntity(ExpertDto dto);
 
-    @Named("toEntityWithZones")
-    default Expert toEntityWithZones(ExpertDto dto, List<Zone> zones) {
-        Expert expert = toEntity(dto);
-        if (zones != null) {
-            expert.setZones(zones);
-        }
-        return expert;
-    }
-
     @Named("extractZoneIds")
     default List<Long> extractZoneIds(List<Zone> zones) {
-        if (zones != null && !zones.isEmpty()) {
-            return zones.stream()
-                    .map(Zone::getId)
-                    .collect(Collectors.toList());
-        }
-        return List.of(); // Retourne une liste vide au lieu de null
+        return zones != null ? zones.stream()
+                .map(Zone::getId)
+                .collect(Collectors.toList()) : List.of();
     }
-
 
     @Named("extractAvailabilityIds")
     default List<Long> extractAvailabilityIds(List<Availability> availabilities) {
-        if (availabilities != null) {
-            return availabilities.stream()
-                    .map(Availability::getId)
-                    .collect(Collectors.toList());
-        }
-        return null;
+        return availabilities != null ? availabilities.stream()
+                .map(Availability::getId)
+                .collect(Collectors.toList()) : List.of();
     }
 
     @Named("extractBookingIds")
     default List<Long> extractBookingIds(List<Booking> bookings) {
-        if (bookings != null) {
-            return bookings.stream()
-                    .map(Booking::getId)
-                    .collect(Collectors.toList());
-        }
-        return null;
+        return bookings != null ? bookings.stream()
+                .map(Booking::getId)
+                .collect(Collectors.toList()) : List.of();
+    }
+
+    @Named("mapZoneIdsToZones")
+    default List<Zone> mapZoneIdsToZones(List<Long> zoneIds) {
+        return zoneIds != null ? zoneIds.stream()
+                .map(id -> {
+                    Zone zone = new Zone();
+                    zone.setId(id);
+                    return zone;
+                })
+                .collect(Collectors.toList()) : List.of();
+    }
+
+    @Named("mapAvailabilityIdsToAvailabilities")
+    default List<Availability> mapAvailabilityIdsToAvailabilities(List<Long> availabilityIds) {
+        return availabilityIds != null ? availabilityIds.stream()
+                .map(id -> {
+                    Availability availability = new Availability();
+                    availability.setId(id);
+                    return availability;
+                })
+                .collect(Collectors.toList()) : List.of();
+    }
+
+    @Named("mapBookingIdsToBookings")
+    default List<Booking> mapBookingIdsToBookings(List<Long> bookingIds) {
+        return bookingIds != null ? bookingIds.stream()
+                .map(id -> {
+                    Booking booking = new Booking();
+                    booking.setId(id);
+                    return booking;
+                })
+                .collect(Collectors.toList()) : List.of();
     }
 }

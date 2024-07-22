@@ -4,10 +4,11 @@ import ma.autocash.booking.api.dto.ZoneDto;
 import ma.autocash.booking.api.entity.Zone;
 import ma.autocash.booking.api.entity.Expert;
 import ma.autocash.booking.api.entity.Booking;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Mappings;
 import org.mapstruct.Named;
-
 
 import java.util.Collections;
 import java.util.List;
@@ -16,12 +17,16 @@ import java.util.stream.Collectors;
 @Mapper(componentModel = "spring")
 public interface ZoneMapper {
 
-    @Mapping(target = "expertIds", source = "experts", qualifiedByName = "extractExpertIds")
-    @Mapping(target = "bookingIds", source = "bookings", qualifiedByName = "extractBookingIds")
+    @Mappings({
+            @Mapping(source = "experts", target = "expertIds", qualifiedByName = "extractExpertIds"),
+            @Mapping(source = "bookings", target = "bookingIds", qualifiedByName = "extractBookingIds")
+    })
     ZoneDto toDto(Zone zone);
 
-    @Mapping(target = "experts", source = "expertIds", qualifiedByName = "toExperts")
-    @Mapping(target = "bookings", source = "bookingIds", qualifiedByName = "toBookings")
+    @Mappings({
+            @Mapping(source = "expertIds", target = "experts", qualifiedByName = "toExperts"),
+            @Mapping(source = "bookingIds", target = "bookings", qualifiedByName = "toBookings")
+    })
     Zone toEntity(ZoneDto dto);
 
     @Named("extractExpertIds")
@@ -52,11 +57,7 @@ public interface ZoneMapper {
     @Named("toBookings")
     default List<Booking> toBookings(List<Long> bookingIds) {
         return bookingIds != null ? bookingIds.stream()
-                .map(id -> {
-                    Booking booking = new Booking();
-                    booking.setId(id);
-                    return booking;
-                })
+                .map(id -> new Booking(id))
                 .collect(Collectors.toList()) : Collections.emptyList();
     }
 }

@@ -5,6 +5,7 @@ import ma.autocash.booking.api.service.ZoneService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import java.util.List;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,12 +28,11 @@ public class ZoneController {
                     @ApiResponse(responseCode = "200", description = "Zone created successfully",
                             content = @Content(mediaType = "application/json"))
             })
-    public ResponseEntity<ZoneDto> saveZone(@RequestBody ZoneDto zoneDto) {
+    public ResponseEntity<ZoneDto> saveZone(@Valid @RequestBody ZoneDto zoneDto) {
         try {
             ZoneDto savedZone = zoneService.saveZone(zoneDto);
             return ResponseEntity.ok(savedZone);
         } catch (Exception e) {
-            // Handle the exception appropriately, e.g., log it and return an error response
             return ResponseEntity.status(500).build();
         }
     }
@@ -44,7 +44,7 @@ public class ZoneController {
                             content = @Content(mediaType = "application/json")),
                     @ApiResponse(responseCode = "404", description = "Zone not found")
             })
-    public ResponseEntity<ZoneDto> updateZone(@PathVariable Long id, @RequestBody ZoneDto zoneDto) {
+    public ResponseEntity<ZoneDto> updateZone(@PathVariable Long id, @Valid @RequestBody ZoneDto zoneDto) {
         try {
             ZoneDto updatedZone = zoneService.updateZone(id, zoneDto);
             return ResponseEntity.ok(updatedZone);
@@ -84,7 +84,6 @@ public class ZoneController {
                     ResponseEntity.ok(zone) :
                     ResponseEntity.notFound().build();
         } catch (Exception e) {
-
             return ResponseEntity.status(500).build();
         }
     }
@@ -100,7 +99,6 @@ public class ZoneController {
             List<ZoneDto> zones = zoneService.getAllZones();
             return ResponseEntity.ok(zones);
         } catch (Exception e) {
-
             return ResponseEntity.status(500).build();
         }
     }

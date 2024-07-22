@@ -2,7 +2,7 @@ package ma.autocash.booking.api.service.impl;
 
 import ma.autocash.booking.api.dto.ZoneDto;
 import ma.autocash.booking.api.entity.Zone;
-import ma.autocash.booking.api.exception.KeyValueErrorImpl;
+import ma.autocash.booking.api.exception.EntityNotFoundException;
 import ma.autocash.booking.api.exception.TechnicalException;
 import ma.autocash.booking.api.mapper.ZoneMapper;
 import ma.autocash.booking.api.repository.ZoneRepository;
@@ -29,16 +29,10 @@ public class ZoneServiceImpl implements ZoneService {
     @Override
     public ZoneDto saveZone(ZoneDto zoneDto) throws TechnicalException {
         try {
-            Objects.requireNonNull(zoneDto, "ZoneDto must not be null");
-            Objects.requireNonNull(zoneDto.getName(), "Zone name must not be null");
-
+            validateZoneDto(zoneDto);
             Zone zoneEntity = zoneMapper.toEntity(zoneDto);
             Zone savedZone = zoneRepository.save(zoneEntity);
-
-            ZoneDto savedZoneDto = zoneMapper.toDto(savedZone);
-            savedZoneDto.setId(savedZone.getId());
-
-            return savedZoneDto;
+            return zoneMapper.toDto(savedZone);
         } catch (Exception e) {
             throw new TechnicalException("Error saving zone", e);
         }
@@ -48,14 +42,13 @@ public class ZoneServiceImpl implements ZoneService {
     public ZoneDto updateZone(Long id, ZoneDto zoneDto) throws TechnicalException {
         try {
             Zone existingZone = zoneRepository.findById(id)
-                    .orElseThrow(() -> new TechnicalException(new KeyValueErrorImpl("zone.update.notfound", 404, 404)));
+                    .orElseThrow(() -> new EntityNotFoundException("Zone", id));
 
             existingZone.setName(zoneDto.getName());
-
             zoneRepository.save(existingZone);
 
             return zoneMapper.toDto(existingZone);
-        } catch (TechnicalException e) {
+        } catch (EntityNotFoundException e) {
             throw e;
         } catch (Exception e) {
             throw new TechnicalException("Error updating zone", e);
@@ -68,9 +61,9 @@ public class ZoneServiceImpl implements ZoneService {
             if (zoneRepository.existsById(id)) {
                 zoneRepository.deleteById(id);
             } else {
-                throw new TechnicalException(new KeyValueErrorImpl("zone.delete.notfound", 404, 404));
+                throw new EntityNotFoundException("Zone", id);
             }
-        } catch (TechnicalException e) {
+        } catch (EntityNotFoundException e) {
             throw e;
         } catch (Exception e) {
             throw new TechnicalException("Error deleting zone", e);
@@ -93,12 +86,17 @@ public class ZoneServiceImpl implements ZoneService {
     public ZoneDto getZoneById(Long id) throws TechnicalException {
         try {
             Zone zone = zoneRepository.findById(id)
-                    .orElseThrow(() -> new TechnicalException(new KeyValueErrorImpl("zone.notfound", 404, 404)));
+                    .orElseThrow(() -> new EntityNotFoundException("Zone", id));
             return zoneMapper.toDto(zone);
-        } catch (TechnicalException e) {
+        } catch (EntityNotFoundException e) {
             throw e;
         } catch (Exception e) {
             throw new TechnicalException("Error retrieving zone by id", e);
         }
+    }
+
+    private void validateZoneDto(ZoneDto zoneDto) {
+        Objects.requireNonNull(zoneDto, "ZoneDto must not be null");
+        Objects.requireNonNull(zoneDto.getName(), "Zone name must not be null");
     }
 }

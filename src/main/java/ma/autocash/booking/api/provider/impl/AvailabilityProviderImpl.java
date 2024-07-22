@@ -2,7 +2,6 @@ package ma.autocash.booking.api.provider.impl;
 
 import ma.autocash.booking.api.entity.Availability;
 import ma.autocash.booking.api.exception.KeyValueErrorImpl;
-import ma.autocash.booking.api.mapper.AvailabilityMapper;
 import ma.autocash.booking.api.repository.AvailabilityRepository;
 import ma.autocash.booking.api.provider.AvailabilityProvider;
 import ma.autocash.booking.api.exception.BusinessException;
@@ -13,16 +12,13 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
-
 @Service
 public class AvailabilityProviderImpl implements AvailabilityProvider {
 
     private final AvailabilityRepository availabilityRepository;
-    private final AvailabilityMapper availabilityMapper;
 
-    public AvailabilityProviderImpl(AvailabilityRepository availabilityRepository, AvailabilityMapper availabilityMapper) {
+    public AvailabilityProviderImpl(AvailabilityRepository availabilityRepository) {
         this.availabilityRepository = availabilityRepository;
-        this.availabilityMapper = availabilityMapper;
     }
 
     @Override

@@ -40,7 +40,7 @@ public class Expert {
     @OneToMany(mappedBy = "expert", cascade = CascadeType.ALL)
     private List<Booking> bookings;
 
-    // Getters and Setters
+    // Getters and setters if Lombok doesn't wor
     public Long getId() {
         return id;
     }
@@ -87,14 +87,5 @@ public class Expert {
 
     public void setBookings(List<Booking> bookings) {
         this.bookings = bookings;
-    }
-
-    public void setZoneIds(List<Long> zoneIds) {
-    }
-
-    public void setAvailabilityIds(List<Long> availabilityIds) {
-    }
-
-    public void setBookingIds(List<Long> bookingIds) {
     }
 }

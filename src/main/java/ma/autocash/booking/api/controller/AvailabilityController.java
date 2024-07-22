@@ -9,8 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -95,6 +93,7 @@ public class AvailabilityController {
         }
         return ResponseEntity.ok(availabilities);
     }
+
     @GetMapping
     @Operation(summary = "Get all Availabilities",
             responses = {

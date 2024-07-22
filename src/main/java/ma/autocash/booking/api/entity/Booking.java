@@ -11,7 +11,7 @@ import java.time.LocalTime;
 //@Table(name = "booking_details", schema = "expertises")
 @Getter
 @Setter
-@NoArgsConstructor
+
 @AllArgsConstructor
 public class Booking {
 
@@ -33,7 +33,13 @@ public class Booking {
     private LocalTime startTime;
     private LocalTime endTime;
 
-    // Getters and Setters
+    public Booking(Long id) {
+        this.id = id;
+    }
+    public Booking() {
+    }
+
+    // Getters and setters if Lombok doesn't wor
     public Long getId() {
         return id;
     }
