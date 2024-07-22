@@ -17,10 +17,8 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 public class ZoneServiceImpl implements ZoneService {
-
     private final ZoneRepository zoneRepository;
     private final ZoneMapper zoneMapper;
-
     public ZoneServiceImpl(ZoneRepository zoneRepository, ZoneMapper zoneMapper) {
         this.zoneRepository = zoneRepository;
         this.zoneMapper = zoneMapper;
@@ -37,16 +35,13 @@ public class ZoneServiceImpl implements ZoneService {
             throw new TechnicalException("Error saving zone", e);
         }
     }
-
     @Override
     public ZoneDto updateZone(Long id, ZoneDto zoneDto) throws TechnicalException {
         try {
             Zone existingZone = zoneRepository.findById(id)
                     .orElseThrow(() -> new EntityNotFoundException("Zone", id));
-
             existingZone.setName(zoneDto.getName());
             zoneRepository.save(existingZone);
-
             return zoneMapper.toDto(existingZone);
         } catch (EntityNotFoundException e) {
             throw e;

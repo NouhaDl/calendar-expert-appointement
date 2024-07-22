@@ -20,7 +20,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional(rollbackFor = {TechnicalException.class, BusinessException.class})
+@Transactional
 public class AvailabilityServiceImpl implements AvailabilityService {
 
     private final AvailabilityRepository availabilityRepository;
@@ -39,8 +39,15 @@ public class AvailabilityServiceImpl implements AvailabilityService {
             Availability availabilityEntity = availabilityMapper.toEntity(availabilityDto);
             setExpertToAvailabilityEntity(availabilityDto, availabilityEntity);
 
-            Availability savedAvailability = availabilityRepository.save(availabilityEntity);
-            return availabilityMapper.toDto(savedAvailability);
+            // Check if the availability already exists
+            if (!availabilityRepository.existsByExpertIdAndDateAndStartTimeAndEndTime(
+                    availabilityDto.getExpertId(), availabilityDto.getDate(),
+                    availabilityDto.getStartTime(), availabilityDto.getEndTime())) {
+                Availability savedAvailability = availabilityRepository.save(availabilityEntity);
+                return availabilityMapper.toDto(savedAvailability);
+            }
+            // If it already exists
+            return null;
         } catch (Exception e) {
             throw new TechnicalException("Error saving availability", e);
         }
@@ -134,6 +141,20 @@ public class AvailabilityServiceImpl implements AvailabilityService {
             availabilityRepository.deleteAll(availabilitiesToDelete);
         } catch (Exception e) {
             throw new TechnicalException("Error deleting availabilities by expert and date/time range", e);
+        }
+    }
+
+    @Override
+    public List<AvailabilityDto> getAvailableAvailabilitiesForExpert(Long expertId) throws TechnicalException {
+        validateId(expertId);
+
+        try {
+            List<Availability> availabilities = availabilityRepository.findByExpert_Id(expertId);
+            return availabilities.stream()
+                    .map(availabilityMapper::toDto)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new TechnicalException("Error retrieving available availabilities for expert", e);
         }
     }
 

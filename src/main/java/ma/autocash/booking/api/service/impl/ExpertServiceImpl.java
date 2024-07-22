@@ -58,7 +58,7 @@ public class ExpertServiceImpl implements ExpertService {
             Expert existingExpert = expertRepository.findById(id)
                     .orElseThrow(() -> new EntityNotFoundException("Expert", id));
 
-            // Update basic fields
+
             existingExpert.setFirstName(expertDto.getFirstName());
             existingExpert.setLastName(expertDto.getLastName());
 

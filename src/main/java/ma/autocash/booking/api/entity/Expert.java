@@ -23,7 +23,6 @@ public class Expert {
 
     @Column(name = "last_name")
     private String lastName;
-
     @JsonManagedReference
     @OneToMany(mappedBy = "expert", cascade = CascadeType.ALL)
     private List<Availability> availabilities;
@@ -39,53 +38,4 @@ public class Expert {
 
     @OneToMany(mappedBy = "expert", cascade = CascadeType.ALL)
     private List<Booking> bookings;
-
-    // Getters and setters if Lombok doesn't wor
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public List<Availability> getAvailabilities() {
-        return availabilities;
-    }
-
-    public void setAvailabilities(List<Availability> availabilities) {
-        this.availabilities = availabilities;
-    }
-
-    public List<Zone> getZones() {
-        return zones;
-    }
-
-    public void setZones(List<Zone> zones) {
-        this.zones = zones;
-    }
-
-    public List<Booking> getBookings() {
-        return bookings;
-    }
-
-    public void setBookings(List<Booking> bookings) {
-        this.bookings = bookings;
-    }
 }

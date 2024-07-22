@@ -8,10 +8,9 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Entity
-//@Table(name = "booking_details", schema = "expertises")
+@Table(name = "booking")
 @Getter
 @Setter
-
 @AllArgsConstructor
 public class Booking {
 
@@ -20,71 +19,32 @@ public class Booking {
     private Long id;
 
     @JsonBackReference
-    @ManyToOne
-    @JoinColumn(name = "expert_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "expert_id", referencedColumnName = "id")
     private Expert expert;
 
     @JsonBackReference
-    @ManyToOne
-    @JoinColumn(name = "zone_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "zone_id", referencedColumnName = "id")
     private Zone zone;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "availability_id", referencedColumnName = "id") // Ensure this matches the column name in the schema
+    private Availability availability;
+
+    @Column(name = "booking_date")
     private LocalDate bookingDate;
+
+    @Column(name = "start_time")
     private LocalTime startTime;
+
+    @Column(name = "end_time")
     private LocalTime endTime;
 
     public Booking(Long id) {
         this.id = id;
     }
+
     public Booking() {
-    }
-
-    // Getters and setters if Lombok doesn't wor
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Expert getExpert() {
-        return expert;
-    }
-
-    public void setExpert(Expert expert) {
-        this.expert = expert;
-    }
-
-    public Zone getZone() {
-        return zone;
-    }
-
-    public void setZone(Zone zone) {
-        this.zone = zone;
-    }
-
-    public LocalDate getBookingDate() {
-        return bookingDate;
-    }
-
-    public void setBookingDate(LocalDate bookingDate) {
-        this.bookingDate = bookingDate;
-    }
-
-    public LocalTime getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(LocalTime startTime) {
-        this.startTime = startTime;
-    }
-
-    public LocalTime getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(LocalTime endTime) {
-        this.endTime = endTime;
     }
 }
