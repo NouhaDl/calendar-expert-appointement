@@ -1,5 +1,4 @@
 package ma.autocash.booking.api.controller;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import ma.autocash.booking.api.dto.AvailabilityDto;
 import ma.autocash.booking.api.exception.BusinessException;

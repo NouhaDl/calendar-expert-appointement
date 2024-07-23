@@ -20,7 +20,6 @@ public class Expert {
     @JsonManagedReference
     @OneToMany(mappedBy = "expert", cascade = CascadeType.ALL)
     private List<Availability> availabilities;
-
     @JsonManagedReference
     @ManyToMany
            @JoinTable(
