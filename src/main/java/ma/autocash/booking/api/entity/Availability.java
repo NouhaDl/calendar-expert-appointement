@@ -32,8 +32,6 @@ public class Availability {
 
     @Column(name = "end_time")
     private LocalTime endTime;
-
-
     public Availability(Long id) {
         this.id = id;
     }

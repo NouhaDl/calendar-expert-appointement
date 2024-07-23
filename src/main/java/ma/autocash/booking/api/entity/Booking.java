@@ -29,7 +29,7 @@ public class Booking {
     private Zone zone;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "availability_id", referencedColumnName = "id") // Ensure this matches the column name in the schema
+    @JoinColumn(name = "availability_id", referencedColumnName = "id")
     private Availability availability;
 
     @Column(name = "booking_date")

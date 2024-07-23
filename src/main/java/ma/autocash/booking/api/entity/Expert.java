@@ -13,7 +13,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Expert {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -29,13 +28,11 @@ public class Expert {
 
     @JsonManagedReference
     @ManyToMany
-    @JoinTable(
+           @JoinTable(
             name = "expert_zone",
             joinColumns = @JoinColumn(name = "expert_id"),
-            inverseJoinColumns = @JoinColumn(name = "zone_id")
-    )
+            inverseJoinColumns = @JoinColumn(name = "zone_id"))
     private List<Zone> zones;
-
     @OneToMany(mappedBy = "expert", cascade = CascadeType.ALL)
     private List<Booking> bookings;
 }
