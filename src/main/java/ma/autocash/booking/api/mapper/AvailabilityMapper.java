@@ -2,12 +2,10 @@ package ma.autocash.booking.api.mapper;
 import ma.autocash.booking.api.dto.AvailabilityDto;
 import ma.autocash.booking.api.entity.Availability;
 import ma.autocash.booking.api.entity.Expert;
-
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.mapstruct.Named;
-
 @Mapper(componentModel = "spring")
 public interface AvailabilityMapper {
 
@@ -25,7 +23,6 @@ public interface AvailabilityMapper {
     default Long extractExpertId(Expert expert) {
         return expert != null ? expert.getId() : null;
     }
-
     @Named("mapExpertIdToExpert")
     default Expert mapExpertIdToExpert(Long expertId) {
         if (expertId == null) {

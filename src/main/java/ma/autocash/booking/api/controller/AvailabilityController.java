@@ -7,25 +7,19 @@ import ma.autocash.booking.api.exception.TechnicalException;
 import ma.autocash.booking.api.service.AvailabilityService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import jakarta.validation.Valid;
 import java.time.LocalTime;
 import java.util.List;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.media.Content;
-
 @RestController
 @RequestMapping("/availabilities")
 public class AvailabilityController {
-
     private final AvailabilityService availabilityService;
-
     public AvailabilityController(AvailabilityService availabilityService) {
         this.availabilityService = availabilityService;
     }
-
     @PostMapping
     @Operation(summary = "Create a new Availability",
             responses = {
@@ -36,7 +30,6 @@ public class AvailabilityController {
         AvailabilityDto savedAvailability = availabilityService.saveAvailability(availabilityDto);
         return ResponseEntity.ok(savedAvailability);
     }
-
     @PutMapping("/{id}")
     @Operation(summary = "Update an existing Availability by ID",
             responses = {
@@ -48,7 +41,6 @@ public class AvailabilityController {
         AvailabilityDto updatedAvailability = availabilityService.updateAvailability(id, availabilityDto);
         return ResponseEntity.ok(updatedAvailability);
     }
-
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete an Availability by ID",
             responses = {
@@ -59,7 +51,6 @@ public class AvailabilityController {
         availabilityService.deleteAvailability(id);
         return ResponseEntity.noContent().build();
     }
-
     @GetMapping("/{id}")
     @Operation(summary = "Get an Availability by ID",
             responses = {
@@ -72,7 +63,6 @@ public class AvailabilityController {
                 ResponseEntity.ok(availability) :
                 ResponseEntity.notFound().build();
     }
-
     @GetMapping("/expert")
     @Operation(summary = "Get Availabilities by Expert ID and Time Range",
             responses = {
@@ -93,7 +83,6 @@ public class AvailabilityController {
         }
         return ResponseEntity.ok(availabilities);
     }
-
     @GetMapping
     @Operation(summary = "Get all Availabilities",
             responses = {

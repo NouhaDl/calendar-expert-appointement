@@ -1,5 +1,4 @@
 package ma.autocash.booking.api.controller;
-
 import ma.autocash.booking.api.dto.ExpertDto;
 import ma.autocash.booking.api.exception.TechnicalException;
 import ma.autocash.booking.api.service.ExpertService;
@@ -9,17 +8,13 @@ import org.springframework.web.bind.annotation.*;
 import ma.autocash.booking.api.exception.EntityNotFoundException;
 import jakarta.validation.Valid;
 import java.util.List;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.media.Content;
-
 @RestController
 @RequestMapping("/experts")
 public class ExpertController {
-
     private final ExpertService expertService;
-
     public ExpertController(ExpertService expertService) {
         this.expertService = expertService;
     }
@@ -91,7 +86,6 @@ public class ExpertController {
                 ResponseEntity.ok(expert) :
                 ResponseEntity.notFound().build();
     }
-
     @GetMapping
     @Operation(summary = "Get all Experts",
             responses = {
@@ -102,7 +96,6 @@ public class ExpertController {
         List<ExpertDto> experts = expertService.getAllExperts();
         return ResponseEntity.ok(experts);
     }
-
 
     @PutMapping("/{expertId}/assign-zones")
     @Operation(summary = "Assign a list of Zones to an Expert by ID",

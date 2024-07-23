@@ -1,5 +1,4 @@
 package ma.autocash.booking.api.exception;
-
 public enum ApiErrors implements KeyValueError {
 
     // NOT FOUND
@@ -21,7 +20,6 @@ public enum ApiErrors implements KeyValueError {
         this.httpCode = httpCode;
         this.msgKey = msgKey;
     }
-
     @Override
     public Integer getHttpCode() {
         return this.httpCode;

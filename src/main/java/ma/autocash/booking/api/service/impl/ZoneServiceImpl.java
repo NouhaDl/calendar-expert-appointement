@@ -1,5 +1,4 @@
 package ma.autocash.booking.api.service.impl;
-
 import ma.autocash.booking.api.dto.ZoneDto;
 import ma.autocash.booking.api.entity.Zone;
 import ma.autocash.booking.api.exception.EntityNotFoundException;
@@ -9,11 +8,9 @@ import ma.autocash.booking.api.repository.ZoneRepository;
 import ma.autocash.booking.api.service.ZoneService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
 @Service
 @Transactional
 public class ZoneServiceImpl implements ZoneService {
@@ -23,7 +20,6 @@ public class ZoneServiceImpl implements ZoneService {
         this.zoneRepository = zoneRepository;
         this.zoneMapper = zoneMapper;
     }
-
     @Override
     public ZoneDto saveZone(ZoneDto zoneDto) throws TechnicalException {
         try {
@@ -49,7 +45,6 @@ public class ZoneServiceImpl implements ZoneService {
             throw new TechnicalException("Error updating zone", e);
         }
     }
-
     @Override
     public void deleteZone(Long id) throws TechnicalException {
         try {
@@ -64,7 +59,6 @@ public class ZoneServiceImpl implements ZoneService {
             throw new TechnicalException("Error deleting zone", e);
         }
     }
-
     @Override
     public List<ZoneDto> getAllZones() throws TechnicalException {
         try {
@@ -89,7 +83,6 @@ public class ZoneServiceImpl implements ZoneService {
             throw new TechnicalException("Error retrieving zone by id", e);
         }
     }
-
     private void validateZoneDto(ZoneDto zoneDto) {
         Objects.requireNonNull(zoneDto, "ZoneDto must not be null");
         Objects.requireNonNull(zoneDto.getName(), "Zone name must not be null");

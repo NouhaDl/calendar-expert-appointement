@@ -1,27 +1,20 @@
 package ma.autocash.booking.api.controller;
-
 import ma.autocash.booking.api.dto.ZoneDto;
 import ma.autocash.booking.api.service.ZoneService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import jakarta.validation.Valid;
 import java.util.List;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.media.Content;
-
 @RestController
 @RequestMapping("/zones")
 public class ZoneController {
-
     private final ZoneService zoneService;
-
     public ZoneController(ZoneService zoneService) {
         this.zoneService = zoneService;
     }
-
     @PostMapping
     @Operation(summary = "Create a new Zone",
             responses = {
@@ -36,7 +29,6 @@ public class ZoneController {
             return ResponseEntity.status(500).build();
         }
     }
-
     @PutMapping("/{id}")
     @Operation(summary = "Update an existing Zone by ID",
             responses = {
@@ -53,7 +45,6 @@ public class ZoneController {
             return ResponseEntity.status(500).build();
         }
     }
-
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete a Zone by ID",
             responses = {
@@ -69,7 +60,6 @@ public class ZoneController {
             return ResponseEntity.status(500).build();
         }
     }
-
     @GetMapping("/{id}")
     @Operation(summary = "Get a Zone by ID",
             responses = {
@@ -87,7 +77,6 @@ public class ZoneController {
             return ResponseEntity.status(500).build();
         }
     }
-
     @GetMapping
     @Operation(summary = "Get all Zones",
             responses = {

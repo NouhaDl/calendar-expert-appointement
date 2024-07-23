@@ -47,7 +47,6 @@ public class ExpertProviderImpl implements ExpertProvider {
             throw new BusinessException(new KeyValueErrorImpl("expert.cannot.be updated", 404, 404));
         }
     }
-
     @Override
     public void deleteExpert(Long id) throws BusinessException {
         try {
@@ -60,7 +59,6 @@ public class ExpertProviderImpl implements ExpertProvider {
             throw new BusinessException(new KeyValueErrorImpl("expert.delete.notfound", 404, 404));
         }
     }
-
     @Override
     public List<Expert> getAllExperts() throws BusinessException {
         try {
@@ -69,7 +67,6 @@ public class ExpertProviderImpl implements ExpertProvider {
             throw new BusinessException(new KeyValueErrorImpl("expert.get.notfound", 404, 404));
         }
     }
-
     @Override
     public Expert getExpertById(Long id) throws BusinessException {
         try {
@@ -79,7 +76,6 @@ public class ExpertProviderImpl implements ExpertProvider {
             throw new BusinessException(new KeyValueErrorImpl("expert.get.notfound", 404, 404));
         }
     }
-
     @Override
     public Expert assignZonesToExpert(Long expertId, List<Long> zoneIds) throws BusinessException {
         try {
