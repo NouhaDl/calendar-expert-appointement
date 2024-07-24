@@ -70,7 +70,6 @@ public class ZoneServiceImpl implements ZoneService {
             throw new TechnicalException("Error retrieving zones", e);
         }
     }
-
     @Override
     public ZoneDto getZoneById(Long id) throws TechnicalException {
         try {

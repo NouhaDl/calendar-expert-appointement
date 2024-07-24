@@ -125,7 +125,6 @@ public class AvailabilityServiceImpl implements AvailabilityService {
     @Override
     public List<AvailabilityDto> getAvailableAvailabilitiesForExpert(Long expertId) throws TechnicalException {
         validateId(expertId);
-
         try {
             List<Availability> availabilities = availabilityRepository.findByExpert_Id(expertId);
             return availabilities.stream()
@@ -144,7 +143,6 @@ public class AvailabilityServiceImpl implements AvailabilityService {
     private void validateAvailabilityDto(AvailabilityDto availabilityDto) {
         Objects.requireNonNull(availabilityDto, "AvailabilityDto must not be null");
     }
-
     private void setExpertToAvailabilityEntity(AvailabilityDto availabilityDto, Availability availabilityEntity) {
         if (availabilityDto.getExpertId() != null) {
             Expert expert = new Expert();
@@ -152,7 +150,6 @@ public class AvailabilityServiceImpl implements AvailabilityService {
             availabilityEntity.setExpert(expert);
         }
     }
-
     private void updateAvailabilityEntity(Availability availability, AvailabilityDto availabilityDto) {
         if (availabilityDto.getExpertId() != null) {
             Expert expert = new Expert();

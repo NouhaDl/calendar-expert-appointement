@@ -27,7 +27,6 @@ public class BookingServiceImpl implements BookingService {
     private final ZoneRepository zoneRepository;
     private final BookingMapper bookingMapper;
     private final AvailabilityService availabilityService;
-
     public BookingServiceImpl(BookingRepository bookingRepository, ExpertRepository expertRepository,
                               ZoneRepository zoneRepository, BookingMapper bookingMapper,
                               AvailabilityService availabilityService) {
@@ -43,19 +42,15 @@ public class BookingServiceImpl implements BookingService {
             Objects.requireNonNull(bookingDto, "BookingDto must not be null");
             Objects.requireNonNull(bookingDto.getExpertId(), "Expert ID must not be null");
             Objects.requireNonNull(bookingDto.getZoneId(), "Zone ID must not be null");
-
             Expert expert = expertRepository.findById(bookingDto.getExpertId())
                     .orElseThrow(() -> new EntityNotFoundException("Expert", bookingDto.getExpertId()));
             Zone zone = zoneRepository.findById(bookingDto.getZoneId())
                     .orElseThrow(() -> new EntityNotFoundException("Zone", bookingDto.getZoneId()));
-
             Booking bookingEntity = bookingMapper.toEntity(bookingDto);
             bookingEntity.setExpert(expert);
             bookingEntity.setZone(zone);
-
             // Save the booking
             Booking savedBooking = bookingRepository.save(bookingEntity);
-
             // Delete overlapping availabilities
             availabilityService.deleteAvailabilitiesByExpertAndDateAndTimeRange(
                     bookingDto.getExpertId(), bookingDto.getBookingDate(),
@@ -79,10 +74,8 @@ public class BookingServiceImpl implements BookingService {
                     existingBooking.getStartTime(), existingBooking.getEndTime());
             // Update booking entity fields
             updateBookingEntity(existingBooking, bookingDto);
-
             // Save the updated booking
             Booking updatedBooking = bookingRepository.save(existingBooking);
-
             // Delete new overlapping availabilities
             availabilityService.deleteAvailabilitiesByExpertAndDateAndTimeRange(
                     bookingDto.getExpertId(), bookingDto.getBookingDate(),
@@ -95,7 +88,6 @@ public class BookingServiceImpl implements BookingService {
             throw new TechnicalException("Error updating booking", e);
         }
     }
-
     @Override
     public void deleteBooking(Long id) throws TechnicalException {
         try {
@@ -107,10 +99,8 @@ public class BookingServiceImpl implements BookingService {
             availabilityDto.setDate(booking.getBookingDate());
             availabilityDto.setStartTime(booking.getStartTime());
             availabilityDto.setEndTime(booking.getEndTime());
-
             // Delete booking
             bookingRepository.deleteById(id);
-
             // Save availability after deleting booking
             availabilityService.saveAvailability(availabilityDto);
         } catch (EntityNotFoundException e) {
@@ -119,7 +109,6 @@ public class BookingServiceImpl implements BookingService {
             throw new TechnicalException("Error deleting booking", e);
         }
     }
-
     @Override
     public List<BookingDto> getAllBookings() throws TechnicalException {
         try {
@@ -131,7 +120,6 @@ public class BookingServiceImpl implements BookingService {
             throw new TechnicalException("Error retrieving bookings", e);
         }
     }
-
     @Override
     public BookingDto getBookingById(Long id) throws TechnicalException {
         try {
@@ -144,7 +132,6 @@ public class BookingServiceImpl implements BookingService {
             throw new TechnicalException("Error retrieving booking by id", e);
         }
     }
-
     private void updateBookingEntity(Booking booking, BookingDto bookingDto) {
         if (bookingDto.getBookingDate() != null) {
             booking.setBookingDate(bookingDto.getBookingDate());
