@@ -12,6 +12,4 @@ public class BookingDto {
     private LocalDate bookingDate;
     private LocalTime startTime;
     private LocalTime endTime;
-
-
 }

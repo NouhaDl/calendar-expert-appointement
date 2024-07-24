@@ -13,10 +13,10 @@ public class ExpertDto {
     @NotNull(message = "First name must not be null")
     @Size(min = 1, message = "First name must not be empty")
     private String firstName;
+
     @NotNull(message = "Last name must not be null")
+    // TODO: You can use @NotBlank instead of @Size(min = 1)
     @Size(min = 1, message = "Last name must not be empty")
-
-
     private String lastName;
     private List<Long> zoneIds;
     private List<Long> availabilityIds;

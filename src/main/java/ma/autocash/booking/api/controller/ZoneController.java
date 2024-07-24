@@ -1,5 +1,7 @@
 package ma.autocash.booking.api.controller;
 import ma.autocash.booking.api.dto.ZoneDto;
+import ma.autocash.booking.api.exception.BusinessException;
+import ma.autocash.booking.api.exception.TechnicalException;
 import ma.autocash.booking.api.service.ZoneService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -8,6 +10,19 @@ import java.util.List;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.media.Content;
+
+// TODO: Check ALL APIs responses and make sure they are returning the correct status code
+// Created => 201
+// Updated => 200
+// Returning response => 200
+// If client is asking for a list of items and there are no items => 204
+
+// The bellow ones will should be managed by the GlobalExceptionHandler
+// Validation error => 422
+// Conflict => 409
+// If client is asking for a single item and it does not exist => 404
+
+
 @RestController
 @RequestMapping("/zones")
 public class ZoneController {
@@ -15,22 +30,19 @@ public class ZoneController {
     public ZoneController(ZoneService zoneService) {
         this.zoneService = zoneService;
     }
+
     @PostMapping
     @Operation(summary = "Create a new Zone",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Zone created successfully",
                             content = @Content(mediaType = "application/json"))
             })
-
-    public ResponseEntity<ZoneDto> saveZone(@Valid @RequestBody ZoneDto zoneDto) {
-
-        try {
-            ZoneDto savedZone = zoneService.saveZone(zoneDto);
-            return ResponseEntity.ok(savedZone);
-        } catch (Exception e) {
-            return ResponseEntity.status(500).build();
-        }
+     // TODO: We have removed the try-catch block and added throws to the method signature so the exception will be handled by the GlobalExceptionHandler
+    public ResponseEntity<ZoneDto> saveZone(@Valid @RequestBody ZoneDto zoneDto) throws BusinessException, TechnicalException {
+        ZoneDto savedZone = zoneService.saveZone(zoneDto);
+        return ResponseEntity.ok(savedZone);
     }
+
     @PutMapping("/{id}")
     @Operation(summary = "Update an existing Zone by ID",
             responses = {
@@ -47,6 +59,7 @@ public class ZoneController {
             return ResponseEntity.status(500).build();
         }
     }
+
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete a Zone by ID",
             responses = {
@@ -62,6 +75,7 @@ public class ZoneController {
             return ResponseEntity.status(500).build();
         }
     }
+
     @GetMapping("/{id}")
     @Operation(summary = "Get a Zone by ID",
             responses = {

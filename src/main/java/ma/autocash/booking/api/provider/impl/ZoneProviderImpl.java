@@ -1,4 +1,5 @@
 package ma.autocash.booking.api.provider.impl;
+
 import ma.autocash.booking.api.entity.Zone;
 import ma.autocash.booking.api.exception.BusinessException;
 import ma.autocash.booking.api.exception.KeyValueErrorImpl;
@@ -7,13 +8,17 @@ import ma.autocash.booking.api.repository.ZoneRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
+
 @Service
 @Transactional
 public class ZoneProviderImpl implements ZoneProvider {
     private final ZoneRepository zoneRepository;
+
     public ZoneProviderImpl(ZoneRepository zoneRepository) {
         this.zoneRepository = zoneRepository;
     }
+
+    // TODO: Please check all exceptions and only keep necessary ones
     @Override
     public Zone saveZone(Zone zone) throws BusinessException {
         try {

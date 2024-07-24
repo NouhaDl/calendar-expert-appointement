@@ -18,7 +18,7 @@ public class ExpertProviderImpl implements ExpertProvider {
 
     private final ExpertRepository expertRepository;
     private final ZoneRepository zoneRepository;
-
+    // TODO: Please check all exceptions and only keep necessary ones
     public ExpertProviderImpl(ExpertRepository expertRepository, ZoneRepository zoneRepository) {
         this.expertRepository = expertRepository;
         this.zoneRepository = zoneRepository;

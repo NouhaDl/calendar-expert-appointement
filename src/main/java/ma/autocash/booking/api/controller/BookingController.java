@@ -34,9 +34,7 @@ public class BookingController {
             BookingDto savedBooking = bookingService.saveBooking(bookingDto);
             return new ResponseEntity<>(savedBooking, HttpStatus.CREATED);
         } catch (TechnicalException e) {
-
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-  
         }
     }
     @PutMapping("/{id}")

@@ -19,15 +19,26 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 public class AvailabilityServiceImpl implements AvailabilityService {
+    // TODO: Service should not depend on repository => It should only depend on provider
     private final AvailabilityRepository availabilityRepository;
     private final AvailabilityMapper availabilityMapper;
     public AvailabilityServiceImpl(AvailabilityRepository availabilityRepository, AvailabilityMapper availabilityMapper) {
         this.availabilityRepository = availabilityRepository;
         this.availabilityMapper = availabilityMapper;
     }
+    // TODO: We will refacto this together and you can do the same for others
     @Override
-    public AvailabilityDto saveAvailability(@Valid AvailabilityDto availabilityDto) throws TechnicalException {
+    // TODO: All create methode should return void, except is some particular cases
+    public AvailabilityDto addExpertAvailability(@Valid AvailabilityDto availabilityDto, Long expertId) throws TechnicalException {
+
+        var availability = availabilityMapper.toEntity(availabilityDto);
+        var savedAvailability = availabilityProvider.save(availability, expertId);
+        return availabilityMapper.toDto(savedAvailability);
+
+
+        // TODO: Remove this line as we have already validated this with @Valid
         validateAvailabilityDto(availabilityDto);
+
         try {
             Availability availabilityEntity = availabilityMapper.toEntity(availabilityDto);
             setExpertToAvailabilityEntity(availabilityDto, availabilityEntity);
