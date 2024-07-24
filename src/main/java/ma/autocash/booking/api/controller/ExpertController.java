@@ -72,6 +72,9 @@ public class ExpertController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+        }
+    }
     @GetMapping("/{id}")
     @Operation(summary = "Get an Expert by ID",
             responses = {

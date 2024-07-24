@@ -1,6 +1,6 @@
 package ma.autocash.booking.api.entity;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import jakarta.persistence.*;
+import javax.persistence.*;
 import lombok.*;
 import java.util.List;
 @Entity
@@ -29,4 +29,6 @@ public class Expert {
     private List<Zone> zones;
     @OneToMany(mappedBy = "expert", cascade = CascadeType.ALL)
     private List<Booking> bookings;
+
 }
+

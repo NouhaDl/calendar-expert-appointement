@@ -1,5 +1,6 @@
 package ma.autocash.booking.api.controller;
 import ma.autocash.booking.api.dto.BookingDto;
+import ma.autocash.booking.api.exception.BusinessException;
 import ma.autocash.booking.api.exception.TechnicalException;
 import ma.autocash.booking.api.service.BookingService;
 import org.springframework.http.HttpStatus;
@@ -28,11 +29,14 @@ public class BookingController {
                             content = @Content(mediaType = "application/json"))
             })
     public ResponseEntity<BookingDto> createBooking(@Valid @RequestBody BookingDto bookingDto) {
+
         try {
             BookingDto savedBooking = bookingService.saveBooking(bookingDto);
             return new ResponseEntity<>(savedBooking, HttpStatus.CREATED);
         } catch (TechnicalException e) {
+
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+  
         }
     }
     @PutMapping("/{id}")
@@ -50,9 +54,11 @@ public class BookingController {
             return ResponseEntity.ok(updatedBooking);
         } catch (TechnicalException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+
         }
     }
     @DeleteMapping("/{id}")
+
     @Operation(summary = "Delete a Booking by ID",
             responses = {
                     @ApiResponse(responseCode = "204", description = "Booking deleted successfully"),
@@ -83,6 +89,7 @@ public class BookingController {
             return ResponseEntity.ok(bookingDto);
         } catch (TechnicalException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+   
         }
     }
     @GetMapping
@@ -99,6 +106,7 @@ public class BookingController {
             return ResponseEntity.ok(bookings);
         } catch (TechnicalException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+
         }
     }
 }

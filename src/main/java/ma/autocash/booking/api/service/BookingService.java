@@ -9,5 +9,4 @@ public interface BookingService {
     List<BookingDto> getAllBookings() throws TechnicalException;
     BookingDto getBookingById(Long id) throws TechnicalException;
 
-
 }

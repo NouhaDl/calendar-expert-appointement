@@ -1,6 +1,6 @@
 package ma.autocash.booking.api.entity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.persistence.*;
+import javax.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -30,9 +30,11 @@ public class Booking {
     private LocalTime startTime;
     @Column(name = "end_time")
     private LocalTime endTime;
+
     public Booking(Long id) {
         this.id = id;
     }
     public Booking() {
     }
 }
+

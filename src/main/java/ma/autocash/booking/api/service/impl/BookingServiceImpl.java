@@ -80,7 +80,6 @@ public class BookingServiceImpl implements BookingService {
             availabilityService.deleteAvailabilitiesByExpertAndDateAndTimeRange(
                     bookingDto.getExpertId(), bookingDto.getBookingDate(),
                     bookingDto.getStartTime(), bookingDto.getEndTime());
-
             return bookingMapper.toDto(updatedBooking);
         } catch (EntityNotFoundException e) {
             throw e;

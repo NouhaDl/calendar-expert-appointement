@@ -1,6 +1,6 @@
 package ma.autocash.booking.api.entity;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import jakarta.persistence.*;
+import javax.persistence.*;
 import lombok.*;
 import java.util.List;
 @Entity
