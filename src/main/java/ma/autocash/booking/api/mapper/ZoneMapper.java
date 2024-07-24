@@ -47,7 +47,7 @@ public interface ZoneMapper {
     @Named("toBookings")
     default List<Booking> toBookings(List<Long> bookingIds) {
         return bookingIds != null ? bookingIds.stream()
-                .map(id -> new Booking(id))
+                .map(Booking::new)
                 .collect(Collectors.toList()) : Collections.emptyList();
     }
 }

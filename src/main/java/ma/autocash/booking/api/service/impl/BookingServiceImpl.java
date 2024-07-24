@@ -1,5 +1,4 @@
 package ma.autocash.booking.api.service.impl;
-
 import ma.autocash.booking.api.dto.AvailabilityDto;
 import ma.autocash.booking.api.dto.BookingDto;
 import ma.autocash.booking.api.entity.Booking;

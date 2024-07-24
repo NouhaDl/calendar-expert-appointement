@@ -1,10 +1,17 @@
 package ma.autocash.booking.api.exception;
 
+import lombok.Getter;
+import lombok.Setter;
+
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Arrays;
 
+@Setter
+@Getter
 public class ErrorMessage implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private String messageKey;
@@ -26,38 +33,6 @@ public class ErrorMessage implements Serializable {
         this.messageKey = messageKey;
         this.errorId = errorId;
         this.httpCode = httpCode;
-        this.parameters = parameters;
-    }
-
-    public String getMessageKey() {
-        return messageKey;
-    }
-
-    public void setMessageKey(String messageKey) {
-        this.messageKey = messageKey;
-    }
-
-    public Integer getErrorId() {
-        return errorId;
-    }
-
-    public void setErrorId(Integer errorId) {
-        this.errorId = errorId;
-    }
-
-    public Integer getHttpCode() {
-        return httpCode;
-    }
-
-    public void setHttpCode(Integer httpCode) {
-        this.httpCode = httpCode;
-    }
-
-    public String[] getParameters() {
-        return parameters;
-    }
-
-    public void setParameters(String[] parameters) {
         this.parameters = parameters;
     }
 

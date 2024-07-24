@@ -1,9 +1,10 @@
 package ma.autocash.booking.api.exception;
-
+import lombok.Getter;
 import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
 public class BusinessException extends Exception {
 
     @Serial
@@ -30,11 +31,4 @@ public class BusinessException extends Exception {
         this.subErrors = subErrors;
     }
 
-    public ErrorMessage getErrorMessage() {
-        return errorMessage;
-    }
-
-    public List<ErrorMessage> getSubErrors() {
-        return subErrors;
-    }
 }
