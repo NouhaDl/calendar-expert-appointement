@@ -1,9 +1,7 @@
 package ma.autocash.booking.api.exception;
-
 import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
-
 public class TechnicalException extends Exception {
 
     @Serial

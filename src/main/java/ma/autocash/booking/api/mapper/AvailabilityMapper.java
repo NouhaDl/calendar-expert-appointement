@@ -18,7 +18,6 @@ public interface AvailabilityMapper {
             @Mapping(target = "expert", source = "expertId", qualifiedByName = "mapExpertIdToExpert")
     })
     Availability toEntity(AvailabilityDto availabilityDto);
-
     @Named("extractExpertId")
     default Long extractExpertId(Expert expert) {
         return expert != null ? expert.getId() : null;

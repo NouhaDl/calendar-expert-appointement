@@ -5,7 +5,6 @@ public class KeyValueErrorImpl implements KeyValueError {
     private String msgKey;
     private Integer id;
     private Integer httpCode;
-
     public  KeyValueErrorImpl (String msgKey, Integer id, Integer httpCode) {
         this.msgKey = msgKey;
         this.id = id;
