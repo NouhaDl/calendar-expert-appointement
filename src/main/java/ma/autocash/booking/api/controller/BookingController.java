@@ -1,4 +1,5 @@
 package ma.autocash.booking.api.controller;
+
 import ma.autocash.booking.api.dto.BookingDto;
 import ma.autocash.booking.api.exception.BusinessException;
 import ma.autocash.booking.api.exception.TechnicalException;
@@ -11,13 +12,17 @@ import java.util.List;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.media.Content;
+
 @RestController
 @RequestMapping("/bookings")
 public class BookingController {
+
     private final BookingService bookingService;
+
     public BookingController(BookingService bookingService) {
         this.bookingService = bookingService;
     }
+
     @PostMapping
     @Operation(summary = "Create a new Booking",
             responses = {
@@ -28,15 +33,12 @@ public class BookingController {
                     @ApiResponse(responseCode = "500", description = "Internal server error",
                             content = @Content(mediaType = "application/json"))
             })
-    public ResponseEntity<BookingDto> createBooking(@Valid @RequestBody BookingDto bookingDto) {
-
-        try {
-            BookingDto savedBooking = bookingService.saveBooking(bookingDto);
-            return new ResponseEntity<>(savedBooking, HttpStatus.CREATED);
-        } catch (TechnicalException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+    public ResponseEntity<Void> createBooking(@Valid @RequestBody BookingDto bookingDto)
+            throws TechnicalException, BusinessException {
+        bookingService.saveBooking(bookingDto);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
+
     @PutMapping("/{id}")
     @Operation(summary = "Update an existing Booking by ID",
             responses = {
@@ -46,17 +48,13 @@ public class BookingController {
                     @ApiResponse(responseCode = "500", description = "Internal server error",
                             content = @Content(mediaType = "application/json"))
             })
-    public ResponseEntity<BookingDto> updateBooking(@PathVariable Long id, @Valid @RequestBody BookingDto bookingDto) {
-        try {
-            BookingDto updatedBooking = bookingService.updateBooking(id, bookingDto);
-            return ResponseEntity.ok(updatedBooking);
-        } catch (TechnicalException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-
-        }
+    public ResponseEntity<Void> updateBooking(@PathVariable Long id, @Valid @RequestBody BookingDto bookingDto)
+            throws TechnicalException, BusinessException {
+        bookingService.updateBooking(id, bookingDto);
+        return ResponseEntity.ok().build();
     }
-    @DeleteMapping("/{id}")
 
+    @DeleteMapping("/{id}")
     @Operation(summary = "Delete a Booking by ID",
             responses = {
                     @ApiResponse(responseCode = "204", description = "Booking deleted successfully"),
@@ -64,14 +62,11 @@ public class BookingController {
                     @ApiResponse(responseCode = "500", description = "Internal server error",
                             content = @Content(mediaType = "application/json"))
             })
-    public ResponseEntity<Void> deleteBooking(@PathVariable Long id) {
-        try {
-            bookingService.deleteBooking(id);
-            return ResponseEntity.noContent().build();
-        } catch (TechnicalException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+    public ResponseEntity<Void> deleteBooking(@PathVariable Long id) throws BusinessException, TechnicalException {
+        bookingService.deleteBooking(id);
+        return ResponseEntity.noContent().build();
     }
+
     @GetMapping("/{id}")
     @Operation(summary = "Get a Booking by ID",
             responses = {
@@ -81,30 +76,22 @@ public class BookingController {
                     @ApiResponse(responseCode = "500", description = "Internal server error",
                             content = @Content(mediaType = "application/json"))
             })
-    public ResponseEntity<BookingDto> getBookingById(@PathVariable Long id) {
-        try {
-            BookingDto bookingDto = bookingService.getBookingById(id);
-            return ResponseEntity.ok(bookingDto);
-        } catch (TechnicalException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-   
-        }
+    public ResponseEntity<BookingDto> getBookingById(@PathVariable Long id) throws TechnicalException, BusinessException {
+        BookingDto bookingDto = bookingService.getBookingById(id);
+        return bookingDto != null ? ResponseEntity.ok(bookingDto) : ResponseEntity.notFound().build();
     }
+
     @GetMapping
     @Operation(summary = "Get all Bookings",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Bookings found",
                             content = @Content(mediaType = "application/json")),
+                    @ApiResponse(responseCode = "204", description = "No bookings found"),
                     @ApiResponse(responseCode = "500", description = "Internal server error",
                             content = @Content(mediaType = "application/json"))
             })
-    public ResponseEntity<List<BookingDto>> getAllBookings() {
-        try {
-            List<BookingDto> bookings = bookingService.getAllBookings();
-            return ResponseEntity.ok(bookings);
-        } catch (TechnicalException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-
-        }
+    public ResponseEntity<List<BookingDto>> getAllBookings() throws TechnicalException, BusinessException {
+        List<BookingDto> bookings = bookingService.getAllBookings();
+        return bookings.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(bookings);
     }
 }

@@ -1,6 +1,5 @@
 package ma.autocash.booking.api.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
@@ -8,21 +7,19 @@ import java.time.LocalTime;
 
 @Entity
 @Table(name = "bookings")
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class Booking {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "expert_id", referencedColumnName = "id")
     private Expert expert;
 
-    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "zone_id", referencedColumnName = "id")
     private Zone zone;
@@ -39,9 +36,4 @@ public class Booking {
 
     @Column(name = "end_time")
     private LocalTime endTime;
-
-    public Booking(Long id) {
-        this.id = id;
-    }
 }
-

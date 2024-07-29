@@ -1,18 +1,21 @@
 package ma.autocash.booking.api.provider.impl;
 
 import ma.autocash.booking.api.entity.Availability;
-import ma.autocash.booking.api.exception.KeyValueErrorImpl;
-import ma.autocash.booking.api.repository.AvailabilityRepository;
-import ma.autocash.booking.api.provider.AvailabilityProvider;
+import ma.autocash.booking.api.exception.ApiErrors;
 import ma.autocash.booking.api.exception.BusinessException;
-import ma.autocash.booking.api.exception.TechnicalException;
+import ma.autocash.booking.api.provider.AvailabilityProvider;
+import ma.autocash.booking.api.repository.AvailabilityRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
 @Service
+@Transactional
 public class AvailabilityProviderImpl implements AvailabilityProvider {
+
     private final AvailabilityRepository availabilityRepository;
 
     public AvailabilityProviderImpl(AvailabilityRepository availabilityRepository) {
@@ -20,66 +23,47 @@ public class AvailabilityProviderImpl implements AvailabilityProvider {
     }
 
     @Override
-    public Availability saveAvailability(Availability availability, Long expertId) throws TechnicalException {
-        var expert = expertProvider.getExpertById(expertId);
-        availability.setExpert(expert);
-        //TODO: Add functional logic here if needed
-        availabilityRepository.saveAvailability(availability);
+    public void addExpertAvailability(Availability availability, Long expertId)  {
+        availabilityRepository.save(availability);
     }
 
     @Override
-    public Availability updateAvailability(Long id, Availability updatedAvailability) throws BusinessException {
-        // TODO: CENTRALIZE ALL ERRORS
-        // Create a file with all ApiErrors as constants
-        // Example: AVAILABILITY_NOT_FOUND("Availability.get.notfound", 404, 404))
-        // WE CAN USE THIS WITH => ApiErrors.AVAILABILITY_NOT_FOUND
-        Availability existingAvailability = availabilityRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(new KeyValueErrorImpl("Availability.get.notfound", 404, 404)));
-        existingAvailability.setDate(updatedAvailability.getDate());
-        existingAvailability.setStartTime(updatedAvailability.getStartTime());
-        existingAvailability.setEndTime(updatedAvailability.getEndTime());
-        return availabilityRepository.save(existingAvailability);
+    public void updateAvailability(Availability availability) throws BusinessException {
+        Availability existingAvailability = availabilityRepository.findById(availability.getId())
+                .orElseThrow(() -> new BusinessException(ApiErrors.AVAILABILITY_NOT_FOUND));
+        existingAvailability.setExpert(availability.getExpert());
+        existingAvailability.setDate(availability.getDate());
+        existingAvailability.setStartTime(availability.getStartTime());
+        existingAvailability.setEndTime(availability.getEndTime());
+
+        availabilityRepository.save(existingAvailability);
     }
 
+
     @Override
-    public void deleteAvailability(Long id) throws TechnicalException {
+    public void deleteAvailability(Long id) {
+
         availabilityRepository.deleteById(id);
-        // TODO: Please check all exceptions and only keep necessary ones
-//        try {
-//            availabilityRepository.deleteById(id);
-//        } catch (Exception e) {
-//            throw new TechnicalException("Failed to delete availability with id: " + id, e);
-//        }
     }
 
     @Override
-    public List<Availability> getAllAvailabilities() throws TechnicalException {
-        // TODO: Please check all exceptions and only keep necessary ones
-        try {
-            return availabilityRepository.findAll();
-        } catch (Exception e) {
-            throw new TechnicalException("Failed to retrieve all availabilities", e);
-        }
+    public Availability getAvailabilityById(Long id) throws BusinessException {
+        return availabilityRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(ApiErrors.AVAILABILITY_NOT_FOUND));
     }
 
     @Override
-    public Availability getAvailabilityById(Long id) throws TechnicalException {
-        // TODO: Please check all exceptions and only keep necessary ones
-        try {
-            return availabilityRepository.findById(id)
-                    .orElseThrow(() -> new BusinessException(new KeyValueErrorImpl("Availability.get.notfound", 404, 404)));
-        } catch (Exception e) {
-            throw new TechnicalException("Failed to retrieve availability with id: " + id, e);
+    public List<Availability> getAllAvailabilities() throws BusinessException {
+        List<Availability> availabilities = availabilityRepository.findAll();
+        if (availabilities.isEmpty()) {
+            throw new BusinessException(ApiErrors.AVAILABILITY_NOT_FOUND);
         }
+        return availabilities;
     }
 
     @Override
-    public List<Availability> getAvailabilitiesByExpertAndDateAndTimeRange(Long expertId, LocalDate date, LocalTime startTime, LocalTime endTime) throws TechnicalException {
-        // TODO: Please check all exceptions and only keep necessary ones
-        try {
-            return availabilityRepository.findByExpert_IdAndStartTimeBetween(expertId, startTime, endTime);
-        } catch (Exception e) {
-            throw new TechnicalException("Failed to retrieve availabilities by expert and time range", e);
-        }
+    public void deleteAvailabilitiesByExpertAndDateAndTimeRange(Long expertId, LocalDate date, LocalTime startTime, LocalTime endTime)  {
+            availabilityRepository.deleteByExpertIdAndDateAndStartTimeLessThanEqualAndEndTimeGreaterThanEqual(expertId, date, startTime, endTime);
+
     }
 }

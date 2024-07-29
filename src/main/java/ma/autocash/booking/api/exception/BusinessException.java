@@ -1,4 +1,5 @@
 package ma.autocash.booking.api.exception;
+
 import lombok.Getter;
 import java.io.Serial;
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ public class BusinessException extends Exception {
     private final ErrorMessage errorMessage;
     private final List<ErrorMessage> subErrors;
 
+    // Existing constructors
     public BusinessException(KeyValueError keyValueError, String... args) {
         super(keyValueError.getMsgKey());
         errorMessage = new ErrorMessage(keyValueError.getMsgKey(), keyValueError.getId(), 400);
@@ -30,5 +32,25 @@ public class BusinessException extends Exception {
         errorMessage = new ErrorMessage(keyValueError.getMsgKey(), keyValueError.getId(), 400);
         this.subErrors = subErrors;
     }
+
+    // New constructors for ApiErrors
+    public BusinessException(ApiErrors apiError) {
+        super(apiError.getMessage());
+        errorMessage = new ErrorMessage(apiError.getMessage(), apiError.getCode(), apiError.getHttpStatus());
+        subErrors = new ArrayList<>();
+    }
+
+    public BusinessException(Exception exception, ApiErrors apiError) {
+        super(exception);
+        errorMessage = new ErrorMessage(apiError.getMessage(), apiError.getCode(), apiError.getHttpStatus());
+        subErrors = new ArrayList<>();
+    }
+
+    public BusinessException(ApiErrors apiError, List<ErrorMessage> subErrors) {
+        super(apiError.getMessage());
+        errorMessage = new ErrorMessage(apiError.getMessage(), apiError.getCode(), apiError.getHttpStatus());
+        this.subErrors = subErrors;
+    }
+
 
 }

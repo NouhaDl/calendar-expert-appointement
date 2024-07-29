@@ -1,8 +1,10 @@
 package ma.autocash.booking.api.controller;
+
 import ma.autocash.booking.api.dto.ZoneDto;
 import ma.autocash.booking.api.exception.BusinessException;
 import ma.autocash.booking.api.exception.TechnicalException;
 import ma.autocash.booking.api.service.ZoneService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
@@ -11,22 +13,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.media.Content;
 
-// TODO: Check ALL APIs responses and make sure they are returning the correct status code
-// Created => 201
-// Updated => 200
-// Returning response => 200
-// If client is asking for a list of items and there are no items => 204
-
-// The bellow ones will should be managed by the GlobalExceptionHandler
-// Validation error => 422
-// Conflict => 409
-// If client is asking for a single item and it does not exist => 404
-
-
 @RestController
 @RequestMapping("/zones")
 public class ZoneController {
+
     private final ZoneService zoneService;
+
     public ZoneController(ZoneService zoneService) {
         this.zoneService = zoneService;
     }
@@ -34,13 +26,16 @@ public class ZoneController {
     @PostMapping
     @Operation(summary = "Create a new Zone",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Zone created successfully",
+                    @ApiResponse(responseCode = "201", description = "Zone created successfully",
+                            content = @Content(mediaType = "application/json")),
+                    @ApiResponse(responseCode = "400", description = "Invalid request",
+                            content = @Content(mediaType = "application/json")),
+                    @ApiResponse(responseCode = "500", description = "Internal server error",
                             content = @Content(mediaType = "application/json"))
             })
-     // TODO: We have removed the try-catch block and added throws to the method signature so the exception will be handled by the GlobalExceptionHandler
-    public ResponseEntity<ZoneDto> saveZone(@Valid @RequestBody ZoneDto zoneDto) throws BusinessException, TechnicalException {
-        ZoneDto savedZone = zoneService.saveZone(zoneDto);
-        return ResponseEntity.ok(savedZone);
+    public ResponseEntity<Void> saveZone(@Valid @RequestBody ZoneDto zoneDto) throws BusinessException, TechnicalException {
+        zoneService.saveZone(zoneDto);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PutMapping("/{id}")
@@ -48,32 +43,26 @@ public class ZoneController {
             responses = {
                     @ApiResponse(responseCode = "200", description = "Zone updated successfully",
                             content = @Content(mediaType = "application/json")),
-                    @ApiResponse(responseCode = "404", description = "Zone not found")
+                    @ApiResponse(responseCode = "404", description = "Zone not found"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error",
+                            content = @Content(mediaType = "application/json"))
             })
-    public ResponseEntity<ZoneDto> updateZone(@PathVariable Long id, @Valid @RequestBody ZoneDto zoneDto) {
-        try {
-            ZoneDto updatedZone = zoneService.updateZone(id, zoneDto);
-            return ResponseEntity.ok(updatedZone);
-        } catch (Exception e) {
-
-            return ResponseEntity.status(500).build();
-        }
+    public ResponseEntity<Void> updateZone(@PathVariable Long id, @Valid @RequestBody ZoneDto zoneDto) throws TechnicalException, BusinessException {
+        zoneService.updateZone(id, zoneDto);
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete a Zone by ID",
             responses = {
                     @ApiResponse(responseCode = "204", description = "Zone deleted successfully"),
-                    @ApiResponse(responseCode = "404", description = "Zone not found")
+                    @ApiResponse(responseCode = "404", description = "Zone not found"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error",
+                            content = @Content(mediaType = "application/json"))
             })
-    public ResponseEntity<Void> deleteZone(@PathVariable Long id) {
-        try {
-            zoneService.deleteZone(id);
-            return ResponseEntity.noContent().build();
-        } catch (Exception e) {
-
-            return ResponseEntity.status(500).build();
-        }
+    public ResponseEntity<Void> deleteZone(@PathVariable Long id) throws BusinessException, TechnicalException {
+        zoneService.deleteZone(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}")
@@ -81,30 +70,26 @@ public class ZoneController {
             responses = {
                     @ApiResponse(responseCode = "200", description = "Zone found",
                             content = @Content(mediaType = "application/json")),
-                    @ApiResponse(responseCode = "404", description = "Zone not found")
+                    @ApiResponse(responseCode = "404", description = "Zone not found"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error",
+                            content = @Content(mediaType = "application/json"))
             })
-    public ResponseEntity<ZoneDto> getZoneById(@PathVariable Long id) {
-        try {
-            ZoneDto zone = zoneService.getZoneById(id);
-            return zone != null ?
-                    ResponseEntity.ok(zone) :
-                    ResponseEntity.notFound().build();
-        } catch (Exception e) {
-            return ResponseEntity.status(500).build();
-        }
+    public ResponseEntity<ZoneDto> getZoneById(@PathVariable Long id) throws TechnicalException, BusinessException {
+        ZoneDto zone = zoneService.getZoneById(id);
+        return ResponseEntity.ok(zone);
     }
+
     @GetMapping
     @Operation(summary = "Get all Zones",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Zones found",
+                            content = @Content(mediaType = "application/json")),
+                    @ApiResponse(responseCode = "204", description = "No zones found"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error",
                             content = @Content(mediaType = "application/json"))
             })
-    public ResponseEntity<List<ZoneDto>> getAllZones() {
-        try {
-            List<ZoneDto> zones = zoneService.getAllZones();
-            return ResponseEntity.ok(zones);
-        } catch (Exception e) {
-            return ResponseEntity.status(500).build();
-        }
+    public ResponseEntity<List<ZoneDto>> getAllZones() throws TechnicalException, BusinessException {
+        List<ZoneDto> zones = zoneService.getAllZones();
+        return zones.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(zones);
     }
 }

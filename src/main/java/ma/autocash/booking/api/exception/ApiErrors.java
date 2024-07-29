@@ -1,37 +1,29 @@
 package ma.autocash.booking.api.exception;
-public enum ApiErrors implements KeyValueError {
 
-    // NOT FOUND
-    USER_NOT_FOUND(4041, 404, "error.users.notFound"),
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-    // CONFLICT
-    USER_ALREADY_EXISTS(4091, 409, "error.users.exists"),
 
-    // TECHNICAL ERROR
-    TECHNICAL_ERROR(5001, 500, "error.technical"),
-    NOTIFICATION_ERROR(5002, 500, "error.technical.notification");
+@Getter
+@AllArgsConstructor
+public enum ApiErrors{
 
-    private final Integer id;
-    private final Integer httpCode;
-    private final String msgKey;
+    // Define constants for all API errors
+     AVAILABILITY_NOT_FOUND("Availability.get.notfound", 404, 404),
 
-    ApiErrors(Integer id, Integer httpCode, String msgKey) {
-        this.id = id;
-        this.httpCode = httpCode;
-        this.msgKey = msgKey;
-    }
-    @Override
-    public Integer getHttpCode() {
-        return this.httpCode;
-    }
+    BOOKING_NOT_FOUND("Booking.get.notfound", 404, 404),
 
-    @Override
-    public Integer getId() {
-        return this.id;
-    }
+    BOOKING_UPDATE_NOT_FOUND("Booking.update.notfound", 404, 404),
 
-    @Override
-    public String getMsgKey() {
-        return this.msgKey;
-    }
+    BOOKING_DELETE_NOT_FOUND("Booking.delete.notfound", 404, 404),
+
+    EXPERT_NOT_FOUND("Expert.get.notfound", 404, 404),
+
+    ZONE_NOT_FOUND("Zone.get.notfound" , 404, 404),;
+
+    private final String message;
+    private final  int code;
+    private  final int httpStatus;
+
+
 }

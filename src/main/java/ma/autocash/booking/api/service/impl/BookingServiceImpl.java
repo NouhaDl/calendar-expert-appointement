@@ -1,154 +1,108 @@
 package ma.autocash.booking.api.service.impl;
+
+import jakarta.validation.Valid;
 import ma.autocash.booking.api.dto.AvailabilityDto;
 import ma.autocash.booking.api.dto.BookingDto;
 import ma.autocash.booking.api.entity.Booking;
 import ma.autocash.booking.api.entity.Expert;
 import ma.autocash.booking.api.entity.Zone;
-import ma.autocash.booking.api.exception.EntityNotFoundException;
-import ma.autocash.booking.api.exception.TechnicalException;
+import ma.autocash.booking.api.exception.BusinessException;
 import ma.autocash.booking.api.mapper.BookingMapper;
-import ma.autocash.booking.api.repository.BookingRepository;
-import ma.autocash.booking.api.repository.ExpertRepository;
-import ma.autocash.booking.api.repository.ZoneRepository;
-import ma.autocash.booking.api.service.AvailabilityService;
+import ma.autocash.booking.api.mapper.AvailabilityMapper;
+import ma.autocash.booking.api.entity.Availability;
+import ma.autocash.booking.api.provider.BookingProvider;
+import ma.autocash.booking.api.provider.ExpertProvider;
+import ma.autocash.booking.api.provider.ZoneProvider;
+import ma.autocash.booking.api.provider.AvailabilityProvider;
 import ma.autocash.booking.api.service.BookingService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import jakarta.validation.Valid;
+
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
+
 @Service
 @Transactional
 public class BookingServiceImpl implements BookingService {
-    private final BookingRepository bookingRepository;
-    private final ExpertRepository expertRepository;
-    private final ZoneRepository zoneRepository;
-    private final BookingMapper bookingMapper;
-    private final AvailabilityService availabilityService;
-    public BookingServiceImpl(BookingRepository bookingRepository, ExpertRepository expertRepository,
-                              ZoneRepository zoneRepository, BookingMapper bookingMapper,
-                              AvailabilityService availabilityService) {
-        this.bookingRepository = bookingRepository;
-        this.expertRepository = expertRepository;
-        this.zoneRepository = zoneRepository;
-        this.bookingMapper = bookingMapper;
-        this.availabilityService = availabilityService;
-    }
-    @Override
-    public BookingDto saveBooking(@Valid BookingDto bookingDto) throws TechnicalException {
-        try {
-            Objects.requireNonNull(bookingDto, "BookingDto must not be null");
-            Objects.requireNonNull(bookingDto.getExpertId(), "Expert ID must not be null");
-            Objects.requireNonNull(bookingDto.getZoneId(), "Zone ID must not be null");
-            Expert expert = expertRepository.findById(bookingDto.getExpertId())
-                    .orElseThrow(() -> new EntityNotFoundException("Expert", bookingDto.getExpertId()));
-            Zone zone = zoneRepository.findById(bookingDto.getZoneId())
-                    .orElseThrow(() -> new EntityNotFoundException("Zone", bookingDto.getZoneId()));
-            Booking bookingEntity = bookingMapper.toEntity(bookingDto);
-            bookingEntity.setExpert(expert);
-            bookingEntity.setZone(zone);
-            // Save the booking
-            Booking savedBooking = bookingRepository.save(bookingEntity);
-            // Delete overlapping availabilities
-            availabilityService.deleteAvailabilitiesByExpertAndDateAndTimeRange(
-                    bookingDto.getExpertId(), bookingDto.getBookingDate(),
-                    bookingDto.getStartTime(), bookingDto.getEndTime());
 
-            BookingDto savedBookingDto = bookingMapper.toDto(savedBooking);
-            savedBookingDto.setId(savedBooking.getId());
-            return savedBookingDto;
-        } catch (Exception e) {
-            throw new TechnicalException("Error saving booking", e);
-        }
+    private final BookingProvider bookingProvider;
+    private final ExpertProvider expertProvider;
+    private final ZoneProvider zoneProvider;
+    private final BookingMapper bookingMapper;
+    private final AvailabilityMapper availabilityMapper;
+    private final AvailabilityProvider availabilityProvider;
+
+    public BookingServiceImpl(BookingProvider bookingProvider, ExpertProvider expertProvider,
+                              ZoneProvider zoneProvider, BookingMapper bookingMapper,
+                              AvailabilityProvider availabilityProvider, AvailabilityMapper availabilityMapper) {
+        this.bookingProvider = bookingProvider;
+        this.expertProvider = expertProvider;
+        this.zoneProvider = zoneProvider;
+        this.bookingMapper = bookingMapper;
+        this.availabilityProvider = availabilityProvider;
+        this.availabilityMapper = availabilityMapper;
     }
+
     @Override
-    public BookingDto updateBooking(Long id, @Valid BookingDto bookingDto) throws TechnicalException {
-        try {
-            Booking existingBooking = bookingRepository.findById(id)
-                    .orElseThrow(() -> new EntityNotFoundException("Booking", id));
-            // Delete old overlapping availabilities
-            availabilityService.deleteAvailabilitiesByExpertAndDateAndTimeRange(
-                    existingBooking.getExpert().getId(), existingBooking.getBookingDate(),
-                    existingBooking.getStartTime(), existingBooking.getEndTime());
-            // Update booking entity fields
-            updateBookingEntity(existingBooking, bookingDto);
-            // Save the updated booking
-            Booking updatedBooking = bookingRepository.save(existingBooking);
-            // Delete new overlapping availabilities
-            availabilityService.deleteAvailabilitiesByExpertAndDateAndTimeRange(
-                    bookingDto.getExpertId(), bookingDto.getBookingDate(),
-                    bookingDto.getStartTime(), bookingDto.getEndTime());
-            return bookingMapper.toDto(updatedBooking);
-        } catch (EntityNotFoundException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new TechnicalException("Error updating booking", e);
-        }
+    public void saveBooking(@Valid BookingDto bookingDto) throws  BusinessException {
+        Expert expert = expertProvider.getExpertById(bookingDto.getExpertId());
+        Zone zone = zoneProvider.getZoneById(bookingDto.getZoneId());
+        Booking booking = bookingMapper.toEntity(bookingDto);
+        booking.setExpert(expert);
+        booking.setZone(zone);
+        bookingProvider.saveBooking(booking);
+        availabilityProvider.deleteAvailabilitiesByExpertAndDateAndTimeRange(
+                bookingDto.getExpertId(), bookingDto.getBookingDate(),
+                bookingDto.getStartTime(), bookingDto.getEndTime());
     }
+
     @Override
-    public void deleteBooking(Long id) throws TechnicalException {
-        try {
-            Booking booking = bookingRepository.findById(id)
-                    .orElseThrow(() -> new EntityNotFoundException("Booking", id));
-            // Save availability before deleting booking
-            AvailabilityDto availabilityDto = new AvailabilityDto();
-            availabilityDto.setExpertId(booking.getExpert().getId());
-            availabilityDto.setDate(booking.getBookingDate());
-            availabilityDto.setStartTime(booking.getStartTime());
-            availabilityDto.setEndTime(booking.getEndTime());
-            // Delete booking
-            bookingRepository.deleteById(id);
-            // Save availability after deleting booking
-            availabilityService.saveAvailability(availabilityDto);
-        } catch (EntityNotFoundException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new TechnicalException("Error deleting booking", e);
-        }
+    public void updateBooking(Long id, @Valid BookingDto bookingDto) throws  BusinessException {
+        Booking existingBooking = bookingProvider.getBookingById(id);
+        updateBookingEntity(existingBooking, bookingDto);
+        bookingProvider.updateBooking(existingBooking);
+        availabilityProvider.deleteAvailabilitiesByExpertAndDateAndTimeRange(
+                bookingDto.getExpertId(), bookingDto.getBookingDate(),
+                bookingDto.getStartTime(), bookingDto.getEndTime());
     }
+
     @Override
-    public List<BookingDto> getAllBookings() throws TechnicalException {
-        try {
-            List<Booking> bookings = bookingRepository.findAll();
-            return bookings.stream()
-                    .map(bookingMapper::toDto)
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            throw new TechnicalException("Error retrieving bookings", e);
-        }
+    public void deleteBooking(Long id) throws BusinessException {
+        Booking booking = bookingProvider.getBookingById(id);
+        bookingProvider.deleteBooking(id);
+        AvailabilityDto availabilityDto = new AvailabilityDto();
+        availabilityDto.setExpertId(booking.getExpert().getId());
+        availabilityDto.setDate(booking.getBookingDate());
+        availabilityDto.setStartTime(booking.getStartTime());
+        availabilityDto.setEndTime(booking.getEndTime());
+        Availability availability = availabilityMapper.toEntity(availabilityDto);
+        availabilityProvider.addExpertAvailability(availability, booking.getExpert().getId());
     }
+
     @Override
-    public BookingDto getBookingById(Long id) throws TechnicalException {
-        try {
-            Booking booking = bookingRepository.findById(id)
-                    .orElseThrow(() -> new EntityNotFoundException("Booking", id));
-            return bookingMapper.toDto(booking);
-        } catch (EntityNotFoundException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new TechnicalException("Error retrieving booking by id", e);
-        }
+    public List<BookingDto> getAllBookings() throws  BusinessException {
+        List<Booking> bookings = bookingProvider.getAllBookings();
+        return bookingMapper.toDto(bookings);
     }
-    private void updateBookingEntity(Booking booking, BookingDto bookingDto) {
-        if (bookingDto.getBookingDate() != null) {
-            booking.setBookingDate(bookingDto.getBookingDate());
+
+    @Override
+    public BookingDto getBookingById(Long id) throws  BusinessException {
+        Booking booking = bookingProvider.getBookingById(id);
+        return bookingMapper.toDto(booking);
+    }
+
+    private void updateBookingEntity(Booking existingBooking, BookingDto bookingDto) {
+        if (bookingDto.getExpertId() != null) {
+            Expert expert = new Expert();
+            expert.setId(bookingDto.getExpertId());
+            existingBooking.setExpert(expert);
         }
-        if (bookingDto.getStartTime() != null) {
-            booking.setStartTime(bookingDto.getStartTime());
+        if(bookingDto.getZoneId() != null) {
+            Zone zone = new Zone();
+            zone.setId(bookingDto.getZoneId());
+            existingBooking.setZone(zone);
         }
-        if (bookingDto.getEndTime() != null) {
-            booking.setEndTime(bookingDto.getEndTime());
-        }
-        if (bookingDto.getExpertId() != null && !Objects.equals(booking.getExpert().getId(), bookingDto.getExpertId())) {
-            Expert expert = expertRepository.findById(bookingDto.getExpertId())
-                    .orElseThrow(() -> new EntityNotFoundException("Expert", bookingDto.getExpertId()));
-            booking.setExpert(expert);
-        }
-        if (bookingDto.getZoneId() != null && !Objects.equals(booking.getZone().getId(), bookingDto.getZoneId())) {
-            Zone zone = zoneRepository.findById(bookingDto.getZoneId())
-                    .orElseThrow(() -> new EntityNotFoundException("Zone", bookingDto.getZoneId()));
-            booking.setZone(zone);
-        }
+        existingBooking.setBookingDate(bookingDto.getBookingDate());
+        existingBooking.setStartTime(bookingDto.getStartTime());
+        existingBooking.setEndTime(bookingDto.getEndTime());
     }
 }

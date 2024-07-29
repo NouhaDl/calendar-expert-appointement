@@ -1,11 +1,19 @@
 package ma.autocash.booking.api.service;
+
 import ma.autocash.booking.api.dto.ZoneDto;
-import ma.autocash.booking.api.exception.TechnicalException;
+import ma.autocash.booking.api.exception.BusinessException;
+
+
 import java.util.List;
+
 public interface ZoneService {
-    ZoneDto saveZone(ZoneDto zoneDto) throws TechnicalException;
-    ZoneDto updateZone(Long id, ZoneDto zoneDto) throws TechnicalException;
-    void deleteZone(Long id) throws TechnicalException;
-    List<ZoneDto> getAllZones() throws TechnicalException;
-    ZoneDto getZoneById(Long id) throws TechnicalException;
+    void saveZone(ZoneDto zoneDto) throws  BusinessException;
+
+    void updateZone(Long id, ZoneDto zoneDto) throws  BusinessException;
+
+    void deleteZone(Long id) ;
+
+    List<ZoneDto> getAllZones() throws  BusinessException;
+
+    ZoneDto getZoneById(Long id) throws  BusinessException;
 }
