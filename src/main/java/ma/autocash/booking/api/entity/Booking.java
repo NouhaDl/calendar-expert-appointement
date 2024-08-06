@@ -1,15 +1,18 @@
 package ma.autocash.booking.api.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Entity
 @Table(name = "bookings")
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class Booking {
 
     @Id
@@ -17,16 +20,8 @@ public class Booking {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "expert_id", referencedColumnName = "id")
+    @JoinColumn(name = "experts_id")
     private Expert expert;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "zone_id", referencedColumnName = "id")
-    private Zone zone;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "availability_id", referencedColumnName = "id")
-    private Availability availability;
 
     @Column(name = "booking_date")
     private LocalDate bookingDate;
@@ -36,4 +31,8 @@ public class Booking {
 
     @Column(name = "end_time")
     private LocalTime endTime;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "zones_id")
+    private Zone zone;
 }

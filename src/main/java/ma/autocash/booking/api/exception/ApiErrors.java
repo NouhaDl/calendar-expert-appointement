@@ -8,7 +8,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum ApiErrors{
 
-    // Define constants for all API errors
+
      AVAILABILITY_NOT_FOUND("Availability.get.notfound", 404, 404),
 
     BOOKING_NOT_FOUND("Booking.get.notfound", 404, 404),
@@ -18,7 +18,7 @@ public enum ApiErrors{
     BOOKING_DELETE_NOT_FOUND("Booking.delete.notfound", 404, 404),
 
     EXPERT_NOT_FOUND("Expert.get.notfound", 404, 404),
-
+  BOOKING_CONFLICT ("Booking conflict detected", 404, 404),
     ZONE_NOT_FOUND("Zone.get.notfound" , 404, 404),;
 
     private final String message;

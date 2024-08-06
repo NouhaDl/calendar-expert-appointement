@@ -1,21 +1,29 @@
 package ma.autocash.booking.api.service;
 
+import jakarta.validation.Valid;
 import ma.autocash.booking.api.dto.ExpertDto;
+import ma.autocash.booking.api.dto.BookingDto;
+import ma.autocash.booking.api.dto.AvailabilityDto;
+import ma.autocash.booking.api.dto.ZoneDto;
 import ma.autocash.booking.api.exception.BusinessException;
 
 import java.util.List;
 
 public interface ExpertService {
 
-    ExpertDto saveExpert(ExpertDto expertDto) throws BusinessException;
+   void saveExpert(@Valid ExpertDto expertDto);
 
-    ExpertDto updateExpert(Long id, ExpertDto expertDto) throws BusinessException;
+    void deleteExpert(Long id) throws BusinessException;
 
-    void deleteExpert(Long id) ;
+    void updateExpert(@Valid ExpertDto expertDto) throws BusinessException;
+
+    ExpertDto getExpertById(Long id) throws BusinessException;
 
     List<ExpertDto> getAllExperts() throws BusinessException;
 
-    ExpertDto getExpertById(Long id) throws BusinessException;
+    void updateAvailabilityForExpert(Long expertId, AvailabilityDto availabilityDto) throws BusinessException;
+
+    void updateBookingForExpert(Long expertId, BookingDto bookingDto) throws BusinessException;
 
     ExpertDto assignZonesToExpert(Long expertId, List<Long> zoneIds) throws BusinessException;
 }

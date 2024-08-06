@@ -2,7 +2,6 @@ package ma.autocash.booking.api.controller;
 
 import ma.autocash.booking.api.dto.ZoneDto;
 import ma.autocash.booking.api.exception.BusinessException;
-import ma.autocash.booking.api.exception.TechnicalException;
 import ma.autocash.booking.api.service.ZoneService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +19,7 @@ public class ZoneController {
     private final ZoneService zoneService;
 
     public ZoneController(ZoneService zoneService) {
+
         this.zoneService = zoneService;
     }
 
@@ -33,7 +33,7 @@ public class ZoneController {
                     @ApiResponse(responseCode = "500", description = "Internal server error",
                             content = @Content(mediaType = "application/json"))
             })
-    public ResponseEntity<Void> saveZone(@Valid @RequestBody ZoneDto zoneDto) throws BusinessException, TechnicalException {
+    public ResponseEntity<Void> saveZone(@Valid @RequestBody ZoneDto zoneDto) throws BusinessException {
         zoneService.saveZone(zoneDto);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
@@ -47,7 +47,7 @@ public class ZoneController {
                     @ApiResponse(responseCode = "500", description = "Internal server error",
                             content = @Content(mediaType = "application/json"))
             })
-    public ResponseEntity<Void> updateZone(@PathVariable Long id, @Valid @RequestBody ZoneDto zoneDto) throws TechnicalException, BusinessException {
+    public ResponseEntity<Void> updateZone(@PathVariable Long id, @Valid @RequestBody ZoneDto zoneDto) throws  BusinessException {
         zoneService.updateZone(id, zoneDto);
         return ResponseEntity.ok().build();
     }
@@ -60,7 +60,7 @@ public class ZoneController {
                     @ApiResponse(responseCode = "500", description = "Internal server error",
                             content = @Content(mediaType = "application/json"))
             })
-    public ResponseEntity<Void> deleteZone(@PathVariable Long id) throws BusinessException, TechnicalException {
+    public ResponseEntity<Void> deleteZone(@PathVariable Long id) throws BusinessException {
         zoneService.deleteZone(id);
         return ResponseEntity.noContent().build();
     }
@@ -74,7 +74,7 @@ public class ZoneController {
                     @ApiResponse(responseCode = "500", description = "Internal server error",
                             content = @Content(mediaType = "application/json"))
             })
-    public ResponseEntity<ZoneDto> getZoneById(@PathVariable Long id) throws TechnicalException, BusinessException {
+    public ResponseEntity<ZoneDto> getZoneById(@PathVariable Long id) throws BusinessException {
         ZoneDto zone = zoneService.getZoneById(id);
         return ResponseEntity.ok(zone);
     }
@@ -88,7 +88,7 @@ public class ZoneController {
                     @ApiResponse(responseCode = "500", description = "Internal server error",
                             content = @Content(mediaType = "application/json"))
             })
-    public ResponseEntity<List<ZoneDto>> getAllZones() throws TechnicalException, BusinessException {
+    public ResponseEntity<List<ZoneDto>> getAllZones() throws BusinessException {
         List<ZoneDto> zones = zoneService.getAllZones();
         return zones.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(zones);
     }

@@ -1,6 +1,8 @@
 package ma.autocash.booking.api.provider.impl;
 
+import jakarta.validation.Valid;
 import ma.autocash.booking.api.entity.Availability;
+import ma.autocash.booking.api.entity.Booking;
 import ma.autocash.booking.api.exception.ApiErrors;
 import ma.autocash.booking.api.exception.BusinessException;
 import ma.autocash.booking.api.provider.AvailabilityProvider;
@@ -23,26 +25,24 @@ public class AvailabilityProviderImpl implements AvailabilityProvider {
     }
 
     @Override
-    public void addExpertAvailability(Availability availability, Long expertId)  {
+    public void addExpertAvailability(@Valid Availability availability) throws BusinessException {
         availabilityRepository.save(availability);
     }
 
     @Override
-    public void updateAvailability(Availability availability) throws BusinessException {
-        Availability existingAvailability = availabilityRepository.findById(availability.getId())
-                .orElseThrow(() -> new BusinessException(ApiErrors.AVAILABILITY_NOT_FOUND));
-        existingAvailability.setExpert(availability.getExpert());
-        existingAvailability.setDate(availability.getDate());
-        existingAvailability.setStartTime(availability.getStartTime());
-        existingAvailability.setEndTime(availability.getEndTime());
+    public void updateAvailability(@Valid Availability availability) throws BusinessException {
+        if (!availabilityRepository.existsById(availability.getId())) {
+            throw new BusinessException(ApiErrors.AVAILABILITY_NOT_FOUND);
+        }
+        availabilityRepository.save(availability);
 
-        availabilityRepository.save(existingAvailability);
     }
 
-
     @Override
-    public void deleteAvailability(Long id) {
-
+    public void deleteAvailability(Long id) throws BusinessException {
+        if (!availabilityRepository.existsById(id)) {
+            throw new BusinessException(ApiErrors.AVAILABILITY_NOT_FOUND);
+        }
         availabilityRepository.deleteById(id);
     }
 
@@ -62,8 +62,25 @@ public class AvailabilityProviderImpl implements AvailabilityProvider {
     }
 
     @Override
-    public void deleteAvailabilitiesByExpertAndDateAndTimeRange(Long expertId, LocalDate date, LocalTime startTime, LocalTime endTime)  {
-            availabilityRepository.deleteByExpertIdAndDateAndStartTimeLessThanEqualAndEndTimeGreaterThanEqual(expertId, date, startTime, endTime);
+    public List<Availability> getAvailabilitiesByExpertAndDate(Long expertId, LocalDate date) throws BusinessException {
+        List<Availability> availabilities = availabilityRepository.findAvailabilitiesByExpertAndDate(expertId, date);
+        if (availabilities.isEmpty()) {
+            throw new BusinessException(ApiErrors.AVAILABILITY_NOT_FOUND);
+        }
+        return availabilities;
+    }
 
+    @Override
+    public Availability createAvailabilityFromBooking(Booking booking) throws BusinessException {
+        Availability availability = new Availability();
+        availability.setExpert(booking.getExpert());
+        availability.setDate(booking.getBookingDate());
+        availability.setStartTime(booking.getStartTime());
+        availability.setEndTime(booking.getEndTime());
+        return availabilityRepository.save(availability);
+    }
+    @Override
+    public void deleteAvailabilitiesByExpertAndDateAndTimeRange(Long expertId, LocalDate date, LocalTime startTimeStart, LocalTime startTimeEnd) throws BusinessException {
+        availabilityRepository.deleteAvailabilitiesByExpertAndDateAndTimeRange(expertId, date, startTimeStart, startTimeEnd);
     }
 }

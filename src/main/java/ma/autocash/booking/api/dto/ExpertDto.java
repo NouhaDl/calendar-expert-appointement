@@ -3,21 +3,22 @@ package ma.autocash.booking.api.dto;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import java.util.List;
+
 @Data
 public class ExpertDto {
 
-    private Long id;
+  private Long id;
 
-  @NotBlank(message="firstname must not be blank")
-    private String firstName;
+  @NotBlank(message = "First name must not be blank")
+  private String firstName;
 
-    @NotBlank(message="Lastname must not be blank")
-    private String lastName;
+  @NotBlank(message = "Last name must not be blank")
+  private String lastName;
 
-    private List<Long> zoneIds;
+  private List<ZoneDto> zones;
 
-    private List<Long> availabilityIds;
+  private List<AvailabilityDto> availabilities;
 
-    private List<Long> bookingIds;
+  private List<BookingDto> bookings;
 
 }

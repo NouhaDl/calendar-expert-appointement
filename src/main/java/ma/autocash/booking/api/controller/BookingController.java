@@ -2,7 +2,6 @@ package ma.autocash.booking.api.controller;
 
 import ma.autocash.booking.api.dto.BookingDto;
 import ma.autocash.booking.api.exception.BusinessException;
-import ma.autocash.booking.api.exception.TechnicalException;
 import ma.autocash.booking.api.service.BookingService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,10 +32,11 @@ public class BookingController {
                     @ApiResponse(responseCode = "500", description = "Internal server error",
                             content = @Content(mediaType = "application/json"))
             })
-    public ResponseEntity<Void> createBooking(@Valid @RequestBody BookingDto bookingDto)
-            throws TechnicalException, BusinessException {
+    public ResponseEntity<BookingDto> saveBooking(@Valid @RequestBody BookingDto bookingDto,
+                                                  @RequestParam Long expertId) throws BusinessException {
         bookingService.saveBooking(bookingDto);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        BookingDto savedBooking = bookingService.getBookingById(bookingDto.getId());
+        return new ResponseEntity<>(savedBooking, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
@@ -48,10 +48,11 @@ public class BookingController {
                     @ApiResponse(responseCode = "500", description = "Internal server error",
                             content = @Content(mediaType = "application/json"))
             })
-    public ResponseEntity<Void> updateBooking(@PathVariable Long id, @Valid @RequestBody BookingDto bookingDto)
-            throws TechnicalException, BusinessException {
-        bookingService.updateBooking(id, bookingDto);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<BookingDto> updateBooking(@PathVariable Long id, @Valid @RequestBody BookingDto bookingDto) throws BusinessException {
+        bookingDto.setId(id);
+        bookingService.updateBooking(bookingDto);
+        BookingDto updatedBooking = bookingService.getBookingById(id);
+        return ResponseEntity.ok(updatedBooking);
     }
 
     @DeleteMapping("/{id}")
@@ -62,7 +63,7 @@ public class BookingController {
                     @ApiResponse(responseCode = "500", description = "Internal server error",
                             content = @Content(mediaType = "application/json"))
             })
-    public ResponseEntity<Void> deleteBooking(@PathVariable Long id) throws BusinessException, TechnicalException {
+    public ResponseEntity<Void> deleteBooking(@PathVariable Long id) throws BusinessException {
         bookingService.deleteBooking(id);
         return ResponseEntity.noContent().build();
     }
@@ -76,9 +77,9 @@ public class BookingController {
                     @ApiResponse(responseCode = "500", description = "Internal server error",
                             content = @Content(mediaType = "application/json"))
             })
-    public ResponseEntity<BookingDto> getBookingById(@PathVariable Long id) throws TechnicalException, BusinessException {
-        BookingDto bookingDto = bookingService.getBookingById(id);
-        return bookingDto != null ? ResponseEntity.ok(bookingDto) : ResponseEntity.notFound().build();
+    public ResponseEntity<BookingDto> getBookingById(@PathVariable Long id) throws BusinessException {
+        BookingDto booking = bookingService.getBookingById(id);
+        return ResponseEntity.ok(booking);
     }
 
     @GetMapping
@@ -90,7 +91,7 @@ public class BookingController {
                     @ApiResponse(responseCode = "500", description = "Internal server error",
                             content = @Content(mediaType = "application/json"))
             })
-    public ResponseEntity<List<BookingDto>> getAllBookings() throws TechnicalException, BusinessException {
+    public ResponseEntity<List<BookingDto>> getAllBookings() throws BusinessException {
         List<BookingDto> bookings = bookingService.getAllBookings();
         return bookings.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(bookings);
     }

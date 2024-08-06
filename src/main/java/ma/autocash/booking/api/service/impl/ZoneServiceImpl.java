@@ -3,6 +3,7 @@ package ma.autocash.booking.api.service.impl;
 import jakarta.validation.Valid;
 import ma.autocash.booking.api.dto.ZoneDto;
 import ma.autocash.booking.api.entity.Zone;
+import ma.autocash.booking.api.exception.ApiErrors;
 import ma.autocash.booking.api.exception.BusinessException;
 import ma.autocash.booking.api.mapper.ZoneMapper;
 import ma.autocash.booking.api.provider.ZoneProvider;
@@ -34,13 +35,19 @@ public class ZoneServiceImpl implements ZoneService {
     @Override
     public void updateZone(Long id, @Valid ZoneDto zoneDto) throws BusinessException {
         Zone existingZone = zoneProvider.getZoneById(id);
+        if (existingZone == null) {
+            throw new BusinessException(ApiErrors.ZONE_NOT_FOUND);
+        }
         existingZone.setName(zoneDto.getName());
         zoneProvider.updateZone(existingZone);
     }
 
     @Override
-    public void deleteZone(Long id)  {
-
+    public void deleteZone(Long id) throws BusinessException {
+        Zone existingZone = zoneProvider.getZoneById(id);
+        if (existingZone == null) {
+            throw new BusinessException(ApiErrors.ZONE_NOT_FOUND);
+        }
         zoneProvider.deleteZone(id);
     }
 
@@ -55,6 +62,9 @@ public class ZoneServiceImpl implements ZoneService {
     @Override
     public ZoneDto getZoneById(Long id) throws BusinessException {
         Zone zone = zoneProvider.getZoneById(id);
+        if (zone == null) {
+            throw new BusinessException(ApiErrors.ZONE_NOT_FOUND);
+        }
         return zoneMapper.toDto(zone);
     }
 }

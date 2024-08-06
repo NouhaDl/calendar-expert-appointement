@@ -2,7 +2,6 @@ package ma.autocash.booking.api.controller;
 
 import ma.autocash.booking.api.dto.ExpertDto;
 import ma.autocash.booking.api.exception.BusinessException;
-import ma.autocash.booking.api.exception.TechnicalException;
 import ma.autocash.booking.api.service.ExpertService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,9 +32,11 @@ public class ExpertController {
                     @ApiResponse(responseCode = "500", description = "Internal server error",
                             content = @Content(mediaType = "application/json"))
             })
-    public ResponseEntity<ExpertDto> saveExpert(@Valid @RequestBody ExpertDto expertDto) throws TechnicalException, BusinessException {
-        ExpertDto savedExpert = expertService.saveExpert(expertDto);
-        return new ResponseEntity<>(savedExpert, HttpStatus.CREATED);
+    public ResponseEntity<ExpertDto> saveExpert(@Valid @RequestBody ExpertDto expertDto) throws BusinessException {
+        expertService.saveExpert(expertDto);
+
+        ExpertDto createdExpert = expertService.getExpertById(expertDto.getId());
+        return new ResponseEntity<>(createdExpert, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
@@ -47,9 +48,10 @@ public class ExpertController {
                     @ApiResponse(responseCode = "500", description = "Internal server error",
                             content = @Content(mediaType = "application/json"))
             })
-    public ResponseEntity<ExpertDto> updateExpert(@PathVariable Long id, @Valid @RequestBody ExpertDto expertDto) throws TechnicalException, BusinessException {
-        ExpertDto updatedExpert = expertService.updateExpert(id, expertDto);
-        return ResponseEntity.ok(updatedExpert);
+    public ResponseEntity<Void> updateExpert(@PathVariable Long id, @Valid @RequestBody ExpertDto expertDto) throws BusinessException {
+        expertDto.setId(id);
+        expertService.updateExpert(expertDto);
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}")
@@ -60,7 +62,7 @@ public class ExpertController {
                     @ApiResponse(responseCode = "500", description = "Internal server error",
                             content = @Content(mediaType = "application/json"))
             })
-    public ResponseEntity<Void> deleteExpert(@PathVariable Long id) throws TechnicalException, BusinessException {
+    public ResponseEntity<Void> deleteExpert(@PathVariable Long id) throws BusinessException {
         expertService.deleteExpert(id);
         return ResponseEntity.noContent().build();
     }
@@ -74,7 +76,7 @@ public class ExpertController {
                     @ApiResponse(responseCode = "500", description = "Internal server error",
                             content = @Content(mediaType = "application/json"))
             })
-    public ResponseEntity<ExpertDto> getExpertById(@PathVariable Long id) throws TechnicalException, BusinessException {
+    public ResponseEntity<ExpertDto> getExpertById(@PathVariable Long id) throws BusinessException {
         ExpertDto expert = expertService.getExpertById(id);
         return expert != null ? ResponseEntity.ok(expert) : ResponseEntity.notFound().build();
     }
@@ -88,7 +90,7 @@ public class ExpertController {
                     @ApiResponse(responseCode = "500", description = "Internal server error",
                             content = @Content(mediaType = "application/json"))
             })
-    public ResponseEntity<List<ExpertDto>> getAllExperts() throws TechnicalException, BusinessException {
+    public ResponseEntity<List<ExpertDto>> getAllExperts() throws BusinessException {
         List<ExpertDto> experts = expertService.getAllExperts();
         return experts.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(experts);
     }
@@ -102,7 +104,7 @@ public class ExpertController {
                     @ApiResponse(responseCode = "500", description = "Internal server error",
                             content = @Content(mediaType = "application/json"))
             })
-    public ResponseEntity<ExpertDto> assignZonesToExpert(@PathVariable Long expertId, @RequestBody List<Long> zoneIds) throws TechnicalException, BusinessException {
+    public ResponseEntity<ExpertDto> assignZonesToExpert(@PathVariable Long expertId, @RequestBody List<Long> zoneIds) throws BusinessException {
         ExpertDto updatedExpert = expertService.assignZonesToExpert(expertId, zoneIds);
         return ResponseEntity.ok(updatedExpert);
     }

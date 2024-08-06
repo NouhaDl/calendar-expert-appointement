@@ -1,10 +1,7 @@
 package ma.autocash.booking.api.entity;
 
-
-import lombok.*;
-
 import jakarta.persistence.*;
-
+import lombok.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -19,9 +16,8 @@ public class Availability {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "expert_id")
+    @JoinColumn(name = "experts_id", referencedColumnName = "id")
     private Expert expert;
 
     @Column(name = "date")
@@ -33,5 +29,7 @@ public class Availability {
     @Column(name = "end_time")
     private LocalTime endTime;
 
-
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "zones_id")
+    private Zone zone;
 }

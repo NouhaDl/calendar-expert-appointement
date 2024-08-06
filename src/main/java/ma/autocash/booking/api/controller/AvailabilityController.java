@@ -1,16 +1,13 @@
 package ma.autocash.booking.api.controller;
 
 import ma.autocash.booking.api.dto.AvailabilityDto;
+import ma.autocash.booking.api.dto.BookingDto;
 import ma.autocash.booking.api.exception.BusinessException;
 import ma.autocash.booking.api.service.AvailabilityService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import jakarta.validation.Valid;
+
+import java.time.LocalDate;
 import java.util.List;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.media.Content;
 
 @RestController
 @RequestMapping("/availabilities")
@@ -23,74 +20,40 @@ public class AvailabilityController {
     }
 
     @PostMapping
-    @Operation(summary = "Create a new Availability",
-            responses = {
-                    @ApiResponse(responseCode = "201", description = "Availability created successfully",
-                            content = @Content(mediaType = "application/json")),
-                    @ApiResponse(responseCode = "400", description = "Invalid request",
-                            content = @Content(mediaType = "application/json")),
-                    @ApiResponse(responseCode = "500", description = "Internal server error",
-                            content = @Content(mediaType = "application/json"))
-            })
-    public ResponseEntity<Void> addExpertAvailability(@Valid @RequestBody AvailabilityDto availabilityDto)
-            throws  BusinessException {
+    public void createAvailability(@RequestBody AvailabilityDto availabilityDto) throws BusinessException {
         availabilityService.addExpertAvailability(availabilityDto);
-        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Update an existing Availability by ID",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Availability updated successfully",
-                            content = @Content(mediaType = "application/json")),
-                    @ApiResponse(responseCode = "404", description = "Availability not found"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error",
-                            content = @Content(mediaType = "application/json"))
-            })
-    public ResponseEntity<Void> updateAvailability(@Valid @RequestBody AvailabilityDto availabilityDto)
-            throws BusinessException {
+    public void updateAvailability(@PathVariable Long id, @RequestBody AvailabilityDto availabilityDto) throws BusinessException {
+        availabilityDto.setId(id);
         availabilityService.updateAvailability(availabilityDto);
-        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete an Availability by ID",
-            responses = {
-                    @ApiResponse(responseCode = "204", description = "Availability deleted successfully"),
-                    @ApiResponse(responseCode = "404", description = "Availability not found"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error",
-                            content = @Content(mediaType = "application/json"))
-            })
-    public ResponseEntity<Void> deleteAvailability(@PathVariable Long id)  {
+    public void deleteAvailability(@PathVariable Long id) throws BusinessException {
         availabilityService.deleteAvailability(id);
-        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Get an Availability by ID",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Availability found",
-                            content = @Content(mediaType = "application/json")),
-                    @ApiResponse(responseCode = "404", description = "Availability not found"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error",
-                            content = @Content(mediaType = "application/json"))
-            })
-    public ResponseEntity<AvailabilityDto> getAvailabilityById(@PathVariable Long id) throws BusinessException {
-        AvailabilityDto availability = availabilityService.getAvailabilityById(id);
-        return ResponseEntity.ok(availability);
+    public AvailabilityDto getAvailabilityById(@PathVariable Long id) throws BusinessException {
+       return availabilityService.getAvailabilityById(id);
     }
 
     @GetMapping
-    @Operation(summary = "Get all Availabilities",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Availabilities found",
-                            content = @Content(mediaType = "application/json")),
-                    @ApiResponse(responseCode = "204", description = "No availabilities found"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error",
-                            content = @Content(mediaType = "application/json"))
-            })
-    public ResponseEntity<List<AvailabilityDto>> getAllAvailabilities() throws  BusinessException {
-        List<AvailabilityDto> availabilities = availabilityService.getAllAvailabilities();
-        return availabilities.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(availabilities);
+    public List<AvailabilityDto> getAvailabilitiesByExpertAndDate(
+            @RequestParam Long expertId,
+            @RequestParam LocalDate date) throws BusinessException {
+        return availabilityService.getAvailabilitiesByExpertAndDate(expertId, date);
+    }
+
+    @GetMapping("/all")
+    public List<AvailabilityDto> getAllAvailabilities() throws BusinessException {
+        return availabilityService.getAllAvailabilities();
+    }
+
+    @PostMapping("/from-booking")
+    public AvailabilityDto createAvailabilityFromBooking(@RequestBody BookingDto bookingDto) throws BusinessException {
+        return availabilityService.createAvailabilityFromBooking(bookingDto);
     }
 }

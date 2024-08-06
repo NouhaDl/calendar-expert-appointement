@@ -1,16 +1,17 @@
 package ma.autocash.booking.api.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import jakarta.validation.constraints.NotNull;
+import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalTime;
+
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class AvailabilityDto {
 
     private Long id;
-
-    @NotNull
-    private Long expertId;
 
     private LocalDate date;
 
@@ -18,4 +19,11 @@ public class AvailabilityDto {
 
     private LocalTime endTime;
 
+    private ZoneDto zone;
+
+    long expertId;
+
+
+
 }
+
