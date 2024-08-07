@@ -54,8 +54,5 @@ public class BookingProviderImpl implements BookingProvider {
         return bookings;
     }
 
-    @Override
-    public List<Booking> getBookingsByIds(List<Long> ids) {
-        return bookingRepository.findAllById(ids);
-    }
+
 }

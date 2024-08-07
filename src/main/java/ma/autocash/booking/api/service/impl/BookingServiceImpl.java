@@ -1,7 +1,9 @@
 package ma.autocash.booking.api.service.impl;
 
 import jakarta.validation.Valid;
+import ma.autocash.booking.api.dto.AvailabilityDto;
 import ma.autocash.booking.api.dto.BookingDto;
+import ma.autocash.booking.api.dto.BookingResponseDto;
 import ma.autocash.booking.api.entity.Booking;
 import ma.autocash.booking.api.entity.Expert;
 import ma.autocash.booking.api.entity.Zone;
@@ -29,8 +31,6 @@ public class BookingServiceImpl implements BookingService {
     private final BookingMapper bookingMapper;
     private final ZoneProvider zoneProvider;
     private final ExpertProvider expertProvider;
-    private final ZoneMapper zoneMapper;
-    private final ExpertMapper expertMapper;
     private final AvailabilityService availabilityService;
 
     public BookingServiceImpl(BookingProvider bookingProvider, BookingMapper bookingMapper,
@@ -41,8 +41,6 @@ public class BookingServiceImpl implements BookingService {
         this.bookingMapper = bookingMapper;
         this.zoneProvider = zoneProvider;
         this.expertProvider = expertProvider;
-        this.zoneMapper = zoneMapper;
-        this.expertMapper = expertMapper;
         this.availabilityService = availabilityService;
     }
 
@@ -54,20 +52,20 @@ public class BookingServiceImpl implements BookingService {
             throw new BusinessException(ApiErrors.ZONE_NOT_FOUND);
         }
         booking.setZone(zone);
-
         Expert expert = expertProvider.getExpertById(bookingDto.getExpertId());
         if (expert == null) {
             throw new BusinessException(ApiErrors.EXPERT_NOT_FOUND);
         }
         booking.setExpert(expert);
-
         bookingProvider.saveBooking(booking);
         availabilityService.deleteAvailabilitiesByExpertAndDateAndTimeRange(
-                booking.getExpert().getId(), booking.getBookingDate(), booking.getStartTime(), booking.getEndTime()
+                expert.getId(), booking.getBookingDate(), booking.getStartTime(), booking.getEndTime()
         );
         expert.getBookings().add(booking);
         expertProvider.updateExpert(expert);
     }
+
+
 
     @Override
     public void updateBooking(@Valid BookingDto bookingDto) throws BusinessException {
@@ -77,7 +75,7 @@ public class BookingServiceImpl implements BookingService {
         }
 
         Expert expert = expertProvider.getExpertById(bookingDto.getExpertId());
-        if (expert == null) {
+        if (expert == null){
             throw new BusinessException(ApiErrors.EXPERT_NOT_FOUND);
         }
 
@@ -108,33 +106,39 @@ public class BookingServiceImpl implements BookingService {
         if (booking == null) {
             throw new BusinessException(ApiErrors.BOOKING_NOT_FOUND);
         }
-        bookingProvider.deleteBooking(id);
-        availabilityService.createAvailabilityFromBooking(bookingMapper.toDto(booking));
-
-        Expert expert = expertProvider.getExpertById(booking.getExpert().getId());
-        if (expert != null) {
-            expert.getBookings().remove(booking);
-            expertProvider.updateExpert(expert);
+        Expert expert = booking.getExpert();
+        if (expert == null) {
+            throw new BusinessException(ApiErrors.EXPERT_NOT_FOUND);
         }
+        bookingProvider.deleteBooking(id);
+        AvailabilityDto availabilityDto = new AvailabilityDto();
+        availabilityDto.setExpertId(expert.getId());
+        availabilityDto.setDate(booking.getBookingDate());
+        availabilityDto.setStartTime(booking.getStartTime());
+        availabilityDto.setEndTime(booking.getEndTime());
+        availabilityService.addExpertAvailability(availabilityDto);
+        expert.getBookings().remove(booking);
+        expertProvider.updateExpert(expert);
     }
 
+
     @Override
-    public BookingDto getBookingById(Long id) throws BusinessException {
+    public BookingResponseDto getBookingById(Long id) throws BusinessException {
         Booking booking = bookingProvider.getBookingById(id);
         if (booking == null) {
             throw new BusinessException(ApiErrors.BOOKING_NOT_FOUND);
         }
-        return bookingMapper.toDto(booking);
+        return bookingMapper.toResponseDto(booking);
     }
 
     @Override
-    public List<BookingDto> getAllBookings() throws BusinessException {
+    public List<BookingResponseDto> getAllBookings() throws BusinessException {
         List<Booking> bookings = bookingProvider.getAllBookings();
         if (bookings.isEmpty()) {
             throw new BusinessException(ApiErrors.BOOKING_NOT_FOUND);
         }
         return bookings.stream()
-                .map(bookingMapper::toDto)
+                .map(bookingMapper::toResponseDto)
                 .collect(Collectors.toList());
     }
 }

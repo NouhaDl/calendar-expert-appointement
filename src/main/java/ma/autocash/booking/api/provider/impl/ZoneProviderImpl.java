@@ -53,14 +53,7 @@ public class ZoneProviderImpl implements ZoneProvider {
         return zones;
     }
 
-    @Override
-    public List<Zone> getZonesByIds(List<Long> ids) throws BusinessException {
-        List<Zone> zones = zoneRepository.findAllById(ids);
-        if (zones.isEmpty()) {
-            throw new BusinessException(ApiErrors.ZONE_NOT_FOUND);
-        }
-        return zones;
-    }
+
 
     @Override
     public Zone getZoneById(Long id) throws BusinessException {

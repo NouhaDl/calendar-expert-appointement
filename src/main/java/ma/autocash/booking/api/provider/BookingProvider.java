@@ -18,5 +18,5 @@ public interface BookingProvider {
 
     List<Booking> getAllBookings() throws BusinessException;
 
-    List<Booking> getBookingsByIds(List<Long> ids);
+
 }

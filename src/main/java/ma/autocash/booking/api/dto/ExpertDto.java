@@ -17,8 +17,8 @@ public class ExpertDto {
 
   private List<ZoneDto> zones;
 
-  private List<AvailabilityDto> availabilities;
+  private List<AvailabilityResponseDto> availabilities;
 
-  private List<BookingDto> bookings;
+  private List<BookingResponseDto> bookings;
 
 }

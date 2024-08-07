@@ -1,3 +1,4 @@
+
 package ma.autocash.booking.api.dto;
 
 import lombok.AllArgsConstructor;
@@ -9,7 +10,7 @@ import java.time.LocalTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AvailabilityDto {
+public class AvailabilityResponseDto {
 
     private Long id;
 
@@ -20,10 +21,4 @@ public class AvailabilityDto {
     private LocalTime endTime;
 
     private ZoneDto zone;
-
-     Long expertId;
-
-
-
 }
-

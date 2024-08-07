@@ -16,7 +16,5 @@ public interface ZoneProvider {
 
     List<Zone> getAllZones() throws BusinessException;
 
-    List<Zone> getZonesByIds(List<Long> ids) throws BusinessException;
-
     Zone getZoneById(Long id) throws BusinessException;
 }

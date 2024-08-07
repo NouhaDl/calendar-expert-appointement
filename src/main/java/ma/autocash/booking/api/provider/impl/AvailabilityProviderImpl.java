@@ -77,6 +77,7 @@ public class AvailabilityProviderImpl implements AvailabilityProvider {
         availability.setDate(booking.getBookingDate());
         availability.setStartTime(booking.getStartTime());
         availability.setEndTime(booking.getEndTime());
+        availability.setZone(booking.getZone());
         return availabilityRepository.save(availability);
     }
     @Override

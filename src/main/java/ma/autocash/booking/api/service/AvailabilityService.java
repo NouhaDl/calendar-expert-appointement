@@ -2,6 +2,7 @@ package ma.autocash.booking.api.service;
 
 import jakarta.validation.Valid;
 import ma.autocash.booking.api.dto.AvailabilityDto;
+import ma.autocash.booking.api.dto.AvailabilityResponseDto;
 import ma.autocash.booking.api.dto.BookingDto;
 import ma.autocash.booking.api.exception.BusinessException;
 
@@ -17,11 +18,11 @@ public interface AvailabilityService {
 
     void deleteAvailability(Long id) throws BusinessException;
 
-    AvailabilityDto getAvailabilityById(Long id) throws BusinessException;
+    AvailabilityResponseDto getAvailabilityById(Long id) throws BusinessException;
 
-    List<AvailabilityDto> getAllAvailabilities() throws BusinessException;
+    List<AvailabilityResponseDto> getAllAvailabilities() throws BusinessException;
 
-    List<AvailabilityDto> getAvailabilitiesByExpertAndDate(Long expertId, LocalDate date) throws BusinessException;
+    List<AvailabilityResponseDto> getAvailabilitiesByExpertAndDate(Long expertId, LocalDate date) throws BusinessException;
 
     AvailabilityDto createAvailabilityFromBooking(@Valid BookingDto bookingDto) throws BusinessException;
 

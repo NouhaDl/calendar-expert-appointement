@@ -1,6 +1,7 @@
 package ma.autocash.booking.api.controller;
 
 import ma.autocash.booking.api.dto.BookingDto;
+import ma.autocash.booking.api.dto.BookingResponseDto;
 import ma.autocash.booking.api.exception.BusinessException;
 import ma.autocash.booking.api.service.BookingService;
 import org.springframework.http.HttpStatus;
@@ -32,11 +33,10 @@ public class BookingController {
                     @ApiResponse(responseCode = "500", description = "Internal server error",
                             content = @Content(mediaType = "application/json"))
             })
-    public ResponseEntity<BookingDto> saveBooking(@Valid @RequestBody BookingDto bookingDto,
-                                                  @RequestParam Long expertId) throws BusinessException {
+    public ResponseEntity<BookingResponseDto> saveBooking(@Valid @RequestBody BookingDto bookingDto) throws BusinessException {
         bookingService.saveBooking(bookingDto);
-        BookingDto savedBooking = bookingService.getBookingById(bookingDto.getId());
-        return new ResponseEntity<>(savedBooking, HttpStatus.CREATED);
+        BookingResponseDto savedBooking = bookingService.getBookingById(bookingDto.getId());
+        return ResponseEntity.created(null).build();
     }
 
     @PutMapping("/{id}")
@@ -48,10 +48,10 @@ public class BookingController {
                     @ApiResponse(responseCode = "500", description = "Internal server error",
                             content = @Content(mediaType = "application/json"))
             })
-    public ResponseEntity<BookingDto> updateBooking(@PathVariable Long id, @Valid @RequestBody BookingDto bookingDto) throws BusinessException {
+    public ResponseEntity<BookingResponseDto> updateBooking(@PathVariable Long id, @Valid @RequestBody BookingDto bookingDto) throws BusinessException {
         bookingDto.setId(id);
         bookingService.updateBooking(bookingDto);
-        BookingDto updatedBooking = bookingService.getBookingById(id);
+        BookingResponseDto updatedBooking = bookingService.getBookingById(id);
         return ResponseEntity.ok(updatedBooking);
     }
 
@@ -77,8 +77,8 @@ public class BookingController {
                     @ApiResponse(responseCode = "500", description = "Internal server error",
                             content = @Content(mediaType = "application/json"))
             })
-    public ResponseEntity<BookingDto> getBookingById(@PathVariable Long id) throws BusinessException {
-        BookingDto booking = bookingService.getBookingById(id);
+    public ResponseEntity<BookingResponseDto> getBookingById(@PathVariable Long id) throws BusinessException {
+        BookingResponseDto booking = bookingService.getBookingById(id);
         return ResponseEntity.ok(booking);
     }
 
@@ -91,8 +91,8 @@ public class BookingController {
                     @ApiResponse(responseCode = "500", description = "Internal server error",
                             content = @Content(mediaType = "application/json"))
             })
-    public ResponseEntity<List<BookingDto>> getAllBookings() throws BusinessException {
-        List<BookingDto> bookings = bookingService.getAllBookings();
+    public ResponseEntity<List<BookingResponseDto>> getAllBookings() throws BusinessException {
+        List<BookingResponseDto> bookings = bookingService.getAllBookings();
         return bookings.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(bookings);
     }
 }

@@ -35,7 +35,7 @@ public class ZoneController {
             })
     public ResponseEntity<Void> saveZone(@Valid @RequestBody ZoneDto zoneDto) throws BusinessException {
         zoneService.saveZone(zoneDto);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.created(null).build();
     }
 
     @PutMapping("/{id}")

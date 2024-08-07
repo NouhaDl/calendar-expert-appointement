@@ -36,7 +36,7 @@ public class ExpertController {
         expertService.saveExpert(expertDto);
 
         ExpertDto createdExpert = expertService.getExpertById(expertDto.getId());
-        return new ResponseEntity<>(createdExpert, HttpStatus.CREATED);
+        return  ResponseEntity.created(null).build();
     }
 
     @PutMapping("/{id}")
@@ -95,17 +95,17 @@ public class ExpertController {
         return experts.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(experts);
     }
 
-    @PutMapping("/{expertId}/assign-zones")
-    @Operation(summary = "Assign a list of Zones to an Expert by ID",
+    @PutMapping("/{id}/zones")
+    @Operation(summary = "Assign Zones to an Expert",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Zones assigned to Expert successfully",
+                    @ApiResponse(responseCode = "200", description = "Zones assigned successfully",
                             content = @Content(mediaType = "application/json")),
-                    @ApiResponse(responseCode = "404", description = "Expert not found or other technical issues"),
+                    @ApiResponse(responseCode = "404", description = "Expert or Zone not found"),
                     @ApiResponse(responseCode = "500", description = "Internal server error",
                             content = @Content(mediaType = "application/json"))
             })
-    public ResponseEntity<ExpertDto> assignZonesToExpert(@PathVariable Long expertId, @RequestBody List<Long> zoneIds) throws BusinessException {
-        ExpertDto updatedExpert = expertService.assignZonesToExpert(expertId, zoneIds);
+    public ResponseEntity<ExpertDto> assignZonesToExpert(@PathVariable Long id, @RequestBody List<Long> zoneIds) throws BusinessException {
+        ExpertDto updatedExpert = expertService.assignZonesToExpert(id, zoneIds);
         return ResponseEntity.ok(updatedExpert);
     }
 }

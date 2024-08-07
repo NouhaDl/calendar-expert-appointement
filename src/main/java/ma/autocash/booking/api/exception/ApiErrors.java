@@ -3,27 +3,33 @@ package ma.autocash.booking.api.exception;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-
 @Getter
 @AllArgsConstructor
-public enum ApiErrors{
+public enum ApiErrors implements KeyValueError {
+    AVAILABILITY_NOT_FOUND(404, 404, "Availability.get.notfound"),
 
+    BOOKING_NOT_FOUND(404, 404, "Booking.get.notfound"),
 
-     AVAILABILITY_NOT_FOUND("Availability.get.notfound", 404, 404),
+    EXPERT_NOT_FOUND(404, 404, "Expert.get.notfound"),
 
-    BOOKING_NOT_FOUND("Booking.get.notfound", 404, 404),
+    ZONE_NOT_FOUND(404, 404, "Zone.get.notfound");
 
-    BOOKING_UPDATE_NOT_FOUND("Booking.update.notfound", 404, 404),
+    private final Integer id;
+    private final Integer httpCode;
+    private final String msgKey;
 
-    BOOKING_DELETE_NOT_FOUND("Booking.delete.notfound", 404, 404),
+    @Override
+    public Integer getId() {
+        return this.id;
+    }
 
-    EXPERT_NOT_FOUND("Expert.get.notfound", 404, 404),
-  BOOKING_CONFLICT ("Booking conflict detected", 404, 404),
-    ZONE_NOT_FOUND("Zone.get.notfound" , 404, 404),;
+    @Override
+    public Integer getHttpCode() {
+        return this.httpCode;
+    }
 
-    private final String message;
-    private final  int code;
-    private  final int httpStatus;
-
-
+    @Override
+    public String getMsgKey() {
+        return this.msgKey;
+    }
 }
