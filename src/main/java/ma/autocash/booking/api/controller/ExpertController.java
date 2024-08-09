@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
+
+import java.net.URI;
 import java.util.List;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -32,12 +34,15 @@ public class ExpertController {
                     @ApiResponse(responseCode = "500", description = "Internal server error",
                             content = @Content(mediaType = "application/json"))
             })
-    public ResponseEntity<ExpertDto> saveExpert(@Valid @RequestBody ExpertDto expertDto) throws BusinessException {
-        expertService.saveExpert(expertDto);
+    public ResponseEntity<Void> saveExpert(@Valid @RequestBody ExpertDto expertDto) throws BusinessException {
 
-        ExpertDto createdExpert = expertService.getExpertById(expertDto.getId());
-        return  ResponseEntity.created(null).build();
+            expertService.saveExpert(expertDto);
+            return ResponseEntity.status(HttpStatus.CREATED).build();
+
+
     }
+
+
 
     @PutMapping("/{id}")
     @Operation(summary = "Update an existing Expert by ID",

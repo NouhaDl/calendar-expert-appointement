@@ -1,6 +1,5 @@
 package ma.autocash.booking.api.provider.impl;
 
-import jakarta.validation.Valid;
 import ma.autocash.booking.api.entity.Expert;
 import ma.autocash.booking.api.entity.Zone;
 import ma.autocash.booking.api.exception.ApiErrors;
@@ -27,12 +26,12 @@ public class ExpertProviderImpl implements ExpertProvider {
     }
 
     @Override
-    public void saveExpert(@Valid Expert expert) {
+    public void saveExpert( Expert expert) {
         expertRepository.save(expert);
     }
 
     @Override
-    public void updateExpert(@Valid Expert expert) throws BusinessException {
+    public void updateExpert( Expert expert) throws BusinessException {
         if (expert == null || expert.getId() == null) {
             throw new BusinessException(ApiErrors.EXPERT_NOT_FOUND);
         }

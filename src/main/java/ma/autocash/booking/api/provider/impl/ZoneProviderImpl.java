@@ -1,6 +1,5 @@
 package ma.autocash.booking.api.provider.impl;
 
-import jakarta.validation.Valid;
 import ma.autocash.booking.api.entity.Zone;
 import ma.autocash.booking.api.exception.ApiErrors;
 import ma.autocash.booking.api.exception.BusinessException;
@@ -23,13 +22,13 @@ public class ZoneProviderImpl implements ZoneProvider {
     }
 
     @Override
-    public void saveZone(@Valid Zone zone) {
+    public void saveZone(Zone zone) {
 
         zoneRepository.save(zone);
     }
 
     @Override
-    public void updateZone(@Valid Zone zone) throws BusinessException {
+    public void updateZone(Zone zone) throws BusinessException {
         if (zoneRepository.existsById(zone.getId())) {
             zoneRepository.save(zone);
         } else {

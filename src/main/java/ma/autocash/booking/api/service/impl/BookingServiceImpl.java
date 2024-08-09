@@ -1,9 +1,9 @@
 package ma.autocash.booking.api.service.impl;
 
-import jakarta.validation.Valid;
 import ma.autocash.booking.api.dto.AvailabilityDto;
 import ma.autocash.booking.api.dto.BookingDto;
 import ma.autocash.booking.api.dto.BookingResponseDto;
+import ma.autocash.booking.api.dto.ZoneDto;
 import ma.autocash.booking.api.entity.Booking;
 import ma.autocash.booking.api.entity.Expert;
 import ma.autocash.booking.api.entity.Zone;
@@ -32,20 +32,21 @@ public class BookingServiceImpl implements BookingService {
     private final ZoneProvider zoneProvider;
     private final ExpertProvider expertProvider;
     private final AvailabilityService availabilityService;
-
+private final ZoneMapper zoneMapper ;
     public BookingServiceImpl(BookingProvider bookingProvider, BookingMapper bookingMapper,
                               ZoneProvider zoneProvider, ExpertProvider expertProvider,
                               ZoneMapper zoneMapper, ExpertMapper expertMapper,
-                              AvailabilityService availabilityService) {
+                              AvailabilityService availabilityService, ZoneMapper zoneMapper1) {
         this.bookingProvider = bookingProvider;
         this.bookingMapper = bookingMapper;
         this.zoneProvider = zoneProvider;
         this.expertProvider = expertProvider;
         this.availabilityService = availabilityService;
+        this.zoneMapper = zoneMapper1;
     }
 
     @Override
-    public void saveBooking(@Valid BookingDto bookingDto) throws BusinessException {
+    public void saveBooking(BookingDto bookingDto) throws BusinessException {
         Booking booking = bookingMapper.toEntity(bookingDto);
         Zone zone = zoneProvider.getZoneById(bookingDto.getZone().getId());
         if (zone == null) {
@@ -68,7 +69,7 @@ public class BookingServiceImpl implements BookingService {
 
 
     @Override
-    public void updateBooking(@Valid BookingDto bookingDto) throws BusinessException {
+    public void updateBooking( BookingDto bookingDto) throws BusinessException {
         Booking existingBooking = bookingProvider.getBookingById(bookingDto.getId());
         if (existingBooking == null) {
             throw new BusinessException(ApiErrors.BOOKING_NOT_FOUND);
@@ -116,6 +117,9 @@ public class BookingServiceImpl implements BookingService {
         availabilityDto.setDate(booking.getBookingDate());
         availabilityDto.setStartTime(booking.getStartTime());
         availabilityDto.setEndTime(booking.getEndTime());
+        ZoneDto zoneDto = zoneMapper.toDto(booking.getZone());
+        availabilityDto.setZone(zoneDto);
+
         availabilityService.addExpertAvailability(availabilityDto);
         expert.getBookings().remove(booking);
         expertProvider.updateExpert(expert);

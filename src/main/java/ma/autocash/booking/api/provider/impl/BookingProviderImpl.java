@@ -1,6 +1,5 @@
 package ma.autocash.booking.api.provider.impl;
 
-import jakarta.validation.Valid;
 import ma.autocash.booking.api.entity.Booking;
 import ma.autocash.booking.api.exception.ApiErrors;
 import ma.autocash.booking.api.exception.BusinessException;
@@ -22,12 +21,12 @@ public class BookingProviderImpl implements BookingProvider {
     }
 
     @Override
-    public void saveBooking(@Valid Booking booking) {
+    public void saveBooking(Booking booking) {
         bookingRepository.save(booking);
     }
 
     @Override
-    public void updateBooking(@Valid Booking booking) throws BusinessException {
+    public void updateBooking( Booking booking) throws BusinessException {
         if (!bookingRepository.existsById(booking.getId())) {
             throw new BusinessException(ApiErrors.BOOKING_NOT_FOUND);
         }
@@ -53,6 +52,4 @@ public class BookingProviderImpl implements BookingProvider {
         }
         return bookings;
     }
-
-
 }

@@ -1,6 +1,5 @@
 package ma.autocash.booking.api.service.impl;
 
-import jakarta.validation.Valid;
 import ma.autocash.booking.api.dto.*;
 import ma.autocash.booking.api.entity.Availability;
 import ma.autocash.booking.api.entity.Booking;
@@ -18,7 +17,9 @@ import ma.autocash.booking.api.service.ExpertService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,10 +44,34 @@ public class ExpertServiceImpl implements ExpertService {
     }
 
     @Override
-    public void saveExpert(@Valid ExpertDto expertDto) {
+    public void saveExpert( ExpertDto expertDto) {
         Expert expert = expertMapper.toEntity(expertDto);
+
+        // Gérer les zones, disponibilités, et réservations si elles sont présentes
+        if (expertDto.getZones() != null) {
+            List<Zone> zones = expertDto.getZones().stream()
+                    .map(zoneMapper::toEntity)
+                    .collect(Collectors.toList());
+            expert.setZones(zones);
+        }
+
+        if (expertDto.getAvailabilities() != null) {
+            List<Availability> availabilities = expertDto.getAvailabilities().stream()
+                    .map(availabilityMapper::toResponseEntity)
+                    .collect(Collectors.toList());
+            expert.setAvailabilities(availabilities);
+        }
+
+        if (expertDto.getBookings() != null) {
+            List<Booking> bookings = expertDto.getBookings().stream()
+                    .map(bookingMapper::toResponseEntity)
+                    .collect(Collectors.toList());
+            expert.setBookings(bookings);
+        }
+
         expertProvider.saveExpert(expert);
     }
+
 
     @Override
     public void deleteExpert(Long id)  {
@@ -54,7 +79,7 @@ public class ExpertServiceImpl implements ExpertService {
     }
 
     @Override
-    public void updateExpert(@Valid ExpertDto expertDto) throws BusinessException {
+    public void updateExpert( ExpertDto expertDto) throws BusinessException {
         Expert existingExpert = expertProvider.getExpertById(expertDto.getId());
         if (existingExpert == null) {
             throw new BusinessException(ApiErrors.EXPERT_NOT_FOUND);
@@ -65,19 +90,19 @@ public class ExpertServiceImpl implements ExpertService {
 
         // Update Zones
         List<Zone> updatedZones = expertDto.getZones().stream()
-                .map(zoneDto -> zoneMapper.toEntity(zoneDto))
+                .map(zoneMapper::toEntity)
                 .collect(Collectors.toList());
         existingExpert.setZones(updatedZones);
 
         // Update Availabilities
         List<Availability> updatedAvailabilities = expertDto.getAvailabilities().stream()
-                .map(availabilityDto -> availabilityMapper.toResponseEntity(availabilityDto))
+                .map(availabilityMapper::toResponseEntity)
                 .collect(Collectors.toList());
         existingExpert.setAvailabilities(updatedAvailabilities);
 
         // Update Bookings
         List<Booking> updatedBookings = expertDto.getBookings().stream()
-                .map(bookingDto -> bookingMapper.toResponseEntity(bookingDto))
+                .map(bookingMapper::toResponseEntity)
                 .collect(Collectors.toList());
         existingExpert.setBookings(updatedBookings);
 
@@ -152,12 +177,17 @@ public class ExpertServiceImpl implements ExpertService {
 
     @Override
     public ExpertDto assignZonesToExpert(Long expertId, List<Long> zoneIds) throws BusinessException {
+        // Récupérer l'expert existant
         Expert expert = expertProvider.getExpertById(expertId);
         if (expert == null) {
             throw new BusinessException(ApiErrors.EXPERT_NOT_FOUND);
         }
 
-        List<Zone> zones = zoneIds.stream()
+        // Récupérer les zones existantes de l'expert
+        List<Zone> existingZones = expert.getZones();
+
+        // Récupérer les nouvelles zones basées sur les IDs
+        List<Zone> newZones = zoneIds.stream()
                 .map(zoneId -> {
                     try {
                         return zoneProvider.getZoneById(zoneId);
@@ -165,17 +195,28 @@ public class ExpertServiceImpl implements ExpertService {
                         return null;
                     }
                 })
-                .filter(zone -> zone != null)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
-        expert.setZones(zones);
+        // Ajouter les nouvelles zones aux zones existantes, en évitant les doublons
+        List<Zone> updatedZones = new ArrayList<>(existingZones);
+        for (Zone newZone : newZones) {
+            if (!updatedZones.contains(newZone)) {
+                updatedZones.add(newZone);
+            }
+        }
+
+        // Mettre à jour les zones de l'expert
+        expert.setZones(updatedZones);
         expertProvider.updateExpert(expert);
 
+        // Convertir l'expert mis à jour en DTO
         ExpertDto expertDto = expertMapper.toDto(expert);
-        expertDto.setZones(zones.stream()
+        expertDto.setZones(updatedZones.stream()
                 .map(zoneMapper::toDto)
                 .collect(Collectors.toList()));
 
         return expertDto;
     }
+
 }

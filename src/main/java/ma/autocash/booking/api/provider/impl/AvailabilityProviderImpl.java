@@ -1,6 +1,5 @@
 package ma.autocash.booking.api.provider.impl;
 
-import jakarta.validation.Valid;
 import ma.autocash.booking.api.entity.Availability;
 import ma.autocash.booking.api.entity.Booking;
 import ma.autocash.booking.api.exception.ApiErrors;
@@ -25,12 +24,12 @@ public class AvailabilityProviderImpl implements AvailabilityProvider {
     }
 
     @Override
-    public void addExpertAvailability(@Valid Availability availability) throws BusinessException {
+    public void addExpertAvailability( Availability availability) throws BusinessException {
         availabilityRepository.save(availability);
     }
 
     @Override
-    public void updateAvailability(@Valid Availability availability) throws BusinessException {
+    public void updateAvailability( Availability availability) throws BusinessException {
         if (!availabilityRepository.existsById(availability.getId())) {
             throw new BusinessException(ApiErrors.AVAILABILITY_NOT_FOUND);
         }

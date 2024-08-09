@@ -1,6 +1,5 @@
 package ma.autocash.booking.api.provider;
 
-import jakarta.validation.Valid;
 import ma.autocash.booking.api.entity.Expert;
 import ma.autocash.booking.api.exception.BusinessException;
 
@@ -8,9 +7,9 @@ import java.util.List;
 
 public interface ExpertProvider {
 
-    void  saveExpert(@Valid Expert expert);
+    void  saveExpert(Expert expert);
 
-    void updateExpert(@Valid Expert expert) throws BusinessException;
+    void updateExpert( Expert expert) throws BusinessException;
 
     void deleteExpert(Long id);
 

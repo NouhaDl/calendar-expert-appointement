@@ -1,6 +1,5 @@
 package ma.autocash.booking.api.service.impl;
 
-import jakarta.validation.Valid;
 import ma.autocash.booking.api.dto.ZoneDto;
 import ma.autocash.booking.api.entity.Zone;
 import ma.autocash.booking.api.exception.ApiErrors;
@@ -27,13 +26,13 @@ public class ZoneServiceImpl implements ZoneService {
     }
 
     @Override
-    public void saveZone(@Valid ZoneDto zoneDto) throws BusinessException {
+    public void saveZone(ZoneDto zoneDto) throws BusinessException {
         Zone zone = zoneMapper.toEntity(zoneDto);
         zoneProvider.saveZone(zone);
     }
 
     @Override
-    public void updateZone(Long id, @Valid ZoneDto zoneDto) throws BusinessException {
+    public void updateZone(Long id, ZoneDto zoneDto) throws BusinessException {
         Zone existingZone = zoneProvider.getZoneById(id);
         if (existingZone == null) {
             throw new BusinessException(ApiErrors.ZONE_NOT_FOUND);
